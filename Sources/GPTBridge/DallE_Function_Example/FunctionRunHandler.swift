@@ -18,7 +18,7 @@ extension FunctionRunHandlable {
         NSError(domain: "noActionRetrievedError", code: 0, userInfo: nil)
     }
 
-    func parse() throws {
+    func parse() throws -> DallE3FunctionArguments {
        guard let action = requiredAction,
              action.submitToolOutputs.toolCalls.count > 0
        else {
