@@ -46,16 +46,17 @@ extension JSONTestAble {
 
 extension XCTestCase: JSONTestAble {}
 
-struct JSONTest: Equatable, Codable {
-    let num: Int
-    let aString: String
-
-    static func ==(lhs: JSONTest, rhs: JSONTest) -> Bool {
-        lhs.num == rhs.num && lhs.aString == rhs.aString
-    }
-}
 
 class JSONTestAbleTests: XCTestCase {
+    struct JSONTest: Equatable, Codable {
+        let num: Int
+        let aString: String
+
+        static func ==(lhs: JSONTest, rhs: JSONTest) -> Bool {
+            lhs.num == rhs.num && lhs.aString == rhs.aString
+        }
+    }
+    
     let testInstance = JSONTest(num: 1, aString: "test")
     let validJSON = """
                     { "a_string":"test","num":1 }
