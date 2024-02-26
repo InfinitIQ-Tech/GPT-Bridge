@@ -28,14 +28,14 @@ extension FunctionRunHandlable {
     }
 }
 /// Assumes an assistant with a function that returns an image prompt
-class FunctionRunHandler: RunHandler {
+class FunctionRunHandler: FunctionRunHandlable {
     private enum Error: Swift.Error {
         /// No required action in the run response
         case noRequiredActionRetrieved
     }
 
 
-    private var requiredAction: RequiredAction?
+    var requiredAction: RequiredAction?
     // MARK: RunHandler implementation
     var runThreadResponse: RunThreadResponse
 
@@ -68,17 +68,6 @@ class FunctionRunHandler: RunHandler {
         self.imageName = arguments.photoName
         let dallEHandler = DallEHandler(prompt: prompt)
         self.imageUrl = try await dallEHandler.generateImage()
-    }
-    
-    /// Parse `requiredAction` for function arguments from `ToolCall`s
-    /// - NOTE: Throws `noRequiredActionRetrieved` on nil `requiredAction` or empty `requiredAction.toolCalls`
-    private func parse() throws -> DallE3FunctionArguments {
-        guard let action = requiredAction,
-              action.submitToolOutputs.toolCalls.count > 0
-        else {
-            throw Error.noRequiredActionRetrieved
-        }
-        return action.submitToolOutputs.toolCalls[0].function.arguments
     }
 }
 
