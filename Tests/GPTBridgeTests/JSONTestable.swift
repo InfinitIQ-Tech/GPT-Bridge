@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  JSONTestable.swift
 //
 //
 //  Created by Kenneth Dubroff on 2/25/24.
@@ -7,7 +7,7 @@
 
 import XCTest
 
-protocol JSONTestAble {
+protocol JSONTestable {
     func toJSONString(from instance: Encodable, using keyEncodingStrategy: JSONEncoder.KeyEncodingStrategy, file: StaticString, line: UInt) throws -> String
     func toJSONData<T: Decodable>(from jsonString: String, to targetType: T.Type, usingKeyDecodingStrategy keyStrategy: JSONDecoder.KeyDecodingStrategy, file: StaticString, line: UInt) throws -> T
 }
@@ -17,7 +17,7 @@ enum JSONError: Error {
     case invalidJSONData
 }
 
-extension JSONTestAble {
+extension JSONTestable {
     func toJSONData<T: Decodable>(from jsonString: String, to targetType: T.Type, usingKeyDecodingStrategy keyStrategy: JSONDecoder.KeyDecodingStrategy = .convertFromSnakeCase, file: StaticString = #file, line: UInt = #line) throws -> T {
         guard let data = jsonString.data(using: .utf8) else {
             XCTFail("The string couldn't be converted to data", file: file, line: line)
@@ -44,7 +44,7 @@ extension JSONTestAble {
     }
 }
 
-extension XCTestCase: JSONTestAble {}
+extension XCTestCase: JSONTestable {}
 
 
 class JSONTestAbleTests: XCTestCase {
