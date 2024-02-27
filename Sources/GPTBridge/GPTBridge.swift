@@ -8,7 +8,7 @@
 import Foundation
 
 class GPTBridge {
-    enum Error: Swift.Error {
+    public enum Error: Swift.Error {
         case nilRunResponse
         case emptyMessageResponseDate
     }
@@ -17,14 +17,14 @@ class GPTBridge {
 
     /// Create a thread to converse with the assistant
     /// - Returns: The thread's ID
-    func createThread() async throws -> String {
+    public func createThread() async throws -> String {
         let createThreadRequestData: CreateThreadRequest? = CreateThreadRequest()
         let response: CreateThreadResponse = try await requestManager
             .makeRequest(endpoint: .threads, method: .POST, requestData: createThreadRequestData)
         return response.id
     }
 
-    func addMessageToThread(message: String, threadId: String, role: Role = .user) async throws {
+    public func addMessageToThread(message: String, threadId: String, role: Role = .user) async throws {
         let messageRequestData: AddMessageToThreadRequest = .init(role: role, content: message)
         do {
             let _: AddMessageToThreadResponse? = try await requestManager
@@ -47,7 +47,7 @@ class GPTBridge {
     /// Create a run in a thread
     /// - Parameter threadId: The threadId of the run to create
     /// - Returns: The created Run's ID
-    func createRun(threadId: String) async throws -> String {
+    public func createRun(threadId: String) async throws -> String {
         // MARK: Create the run
         let runRequestData: CreateThreadRunRequest = CreateThreadRunRequest()
         let runResponse: RunThreadResponse = try await requestManager
@@ -70,7 +70,7 @@ class GPTBridge {
     /// - Returns: An instance of a `RunHandler` subclass based on the final status of the run.
     ///
     /// - Note: This function uses `Task.sleep(nanoseconds: 500_000_000)` to introduce a delay of 0.5 seconds between each poll, to prevent overwhelming the server with requests.
-    func pollRunStatus(threadId: String, runId: String) async throws -> RunHandler {
+    public func pollRunStatus(threadId: String, runId: String) async throws -> RunHandler {
         let runLoopRequestData: RunThreadRequest? = RunThreadRequest()
         let completedStatuses: [RunThreadResponse.Status] = [
             RunThreadResponse.Status.completed,
@@ -107,7 +107,7 @@ class GPTBridge {
         }
     }
 
-    func getMessageId(threadId: String, runId: String) async throws -> String {
+    public func getMessageId(threadId: String, runId: String) async throws -> String {
         let endpoint = AssistantEndpoint.getMessageId(threadId: threadId, runId: runId)
         let requestData: MessageIdRequest? = MessageIdRequest()
         let messageResponse: MessageResponse = try await requestManager.makeRequest(endpoint: endpoint, method: .GET, requestData: requestData)
@@ -115,7 +115,7 @@ class GPTBridge {
         return messageResponse.data[0].stepDetails.messageCreation.messageId
     }
 
-    func getMessageText(threadId: String, messageId: String) async throws -> String {
+    public func getMessageText(threadId: String, messageId: String) async throws -> String {
         let endpoint = AssistantEndpoint.getMessageText(threadId: threadId, messageId: messageId)
         let requestData: MessageTextRequest? = MessageTextRequest()
         let messageTextResponse: MessageContent = try await requestManager.makeRequest(endpoint: endpoint, method: .GET, requestData: requestData)
