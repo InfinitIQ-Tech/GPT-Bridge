@@ -9,7 +9,7 @@ import XCTest
 
 protocol JSONTestable {
     func toJSONString(from instance: Encodable, using keyEncodingStrategy: JSONEncoder.KeyEncodingStrategy, file: StaticString, line: UInt) throws -> String
-    func toJSONData<T: Decodable>(from jsonString: String, to targetType: T.Type, usingKeyDecodingStrategy keyStrategy: JSONDecoder.KeyDecodingStrategy, file: StaticString, line: UInt) throws -> T
+    func toInstance<T: Decodable>(from jsonString: String, to targetType: T.Type, usingKeyDecodingStrategy keyStrategy: JSONDecoder.KeyDecodingStrategy, file: StaticString, line: UInt) throws -> T
 }
 
 enum JSONError: Error {
@@ -18,7 +18,7 @@ enum JSONError: Error {
 }
 
 extension JSONTestable {
-    func toJSONData<T: Decodable>(from jsonString: String, to targetType: T.Type, usingKeyDecodingStrategy keyStrategy: JSONDecoder.KeyDecodingStrategy = .convertFromSnakeCase, file: StaticString = #file, line: UInt = #line) throws -> T {
+    func toInstance<T: Decodable>(from jsonString: String, to targetType: T.Type, usingKeyDecodingStrategy keyStrategy: JSONDecoder.KeyDecodingStrategy = .convertFromSnakeCase, file: StaticString = #file, line: UInt = #line) throws -> T {
         guard let data = jsonString.data(using: .utf8) else {
             XCTFail("The string couldn't be converted to data", file: file, line: line)
             throw JSONError.invalidJSONString
@@ -66,7 +66,7 @@ class JSONTestAbleTests: XCTestCase {
                     """
 
     func testToJSONData() throws {
-        let testInstance = try toJSONData(from: validJSON, to: JSONTest.self)
+        let testInstance = try toInstance(from: validJSON, to: JSONTest.self)
         XCTAssertEqual(testInstance, self.testInstance)
     }
 
@@ -76,4 +76,3 @@ class JSONTestAbleTests: XCTestCase {
         XCTAssert(string.contains("\"num\":1"))
     }
 }
-
