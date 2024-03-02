@@ -7,7 +7,7 @@
 
 import Foundation
 
-class GPTBridge {
+public class GPTBridge {
     public enum Error: Swift.Error {
         case nilRunResponse
         case emptyMessageResponseDate
@@ -67,10 +67,10 @@ class GPTBridge {
     /// - Otherwise, it returns a `MessageRunHandler`.
     ///
     /// - Throws: An `NSError` if the run response is `nil` after the run is completed.
-    /// - Returns: An instance of a `RunHandler` subclass based on the final status of the run.
+    /// - Returns: An instance of a `RunStepResult` implementation based on the final status of the run. If the assistant runs functions, their propertries will be available in the `functions` property of the `RunStepResult`. Otherwise, if the assistant sends a message back or there's an error, the `message` propperty will contain a String
     ///
     /// - Note: This function uses `Task.sleep(nanoseconds: 500_000_000)` to introduce a delay of 0.5 seconds between each poll, to prevent overwhelming the server with requests.
-    public func pollRunStatus(threadId: String, runId: String) async throws -> RunHandler {
+    public func pollRunStatus(threadId: String, runId: String) async throws -> RunStepResult {
         let runLoopRequestData: RunThreadRequest? = RunThreadRequest()
         let completedStatuses: [RunThreadResponse.Status] = [
             RunThreadResponse.Status.completed,
@@ -99,15 +99,18 @@ class GPTBridge {
         }
 
         if loopStatus == .requiresAction {
-            return FunctionRunHandler(runThreadResponse: currentRunResponse)
+            let functions = currentRunResponse.requiredAction?.submitToolOutputs.toolCalls.compactMap { $0.function } ?? []
+            return FunctionRunStepResult(functions: functions)
         } else if [RunThreadResponse.Status.cancelled, .cancelling, .expired, .failed].contains(loopStatus) {
-            return FailedRunHandler(runThreadResponse: currentRunResponse)
+            let failedRunHandler = FailedRunHandler(runThreadResponse: currentRunResponse)
+            return MessageRunStepResult(message: failedRunHandler.lastError.localizedString) // TODO: Anti-pattern. create FailedRunStepResult
         } else {
-            return MessageRunHandler(runThreadResponse: currentRunResponse, runID: runId, threadID: threadId)
+            let messageHandler = MessageRunHandler(runThreadResponse: currentRunResponse, runID: runId, threadID: threadId)
+            return MessageRunStepResult(message: messageHandler.message ?? "")
         }
     }
 
-    public func getMessageId(threadId: String, runId: String) async throws -> String {
+    func getMessageId(threadId: String, runId: String) async throws -> String { // TODO: Move to MessageRunHandler
         let endpoint = AssistantEndpoint.getMessageId(threadId: threadId, runId: runId)
         let requestData: MessageIdRequest? = MessageIdRequest()
         let messageResponse: MessageResponse = try await requestManager.makeRequest(endpoint: endpoint, method: .GET, requestData: requestData)
@@ -115,7 +118,7 @@ class GPTBridge {
         return messageResponse.data[0].stepDetails.messageCreation.messageId
     }
 
-    public func getMessageText(threadId: String, messageId: String) async throws -> String {
+    func getMessageText(threadId: String, messageId: String) async throws -> String { // TODO: Move to MessageRunHandler
         let endpoint = AssistantEndpoint.getMessageText(threadId: threadId, messageId: messageId)
         let requestData: MessageTextRequest? = MessageTextRequest()
         let messageTextResponse: MessageContent = try await requestManager.makeRequest(endpoint: endpoint, method: .GET, requestData: requestData)

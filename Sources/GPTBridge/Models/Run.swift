@@ -29,14 +29,14 @@ import Foundation
 /// - Note: This struct only tries to decode the data into `Bool`, `Int`, `Double`, `String`, `Array<AnyDecodable>`,
 /// and `Dictionary<String, AnyDecodable>`.
 /// - Throws: `DecodingError.dataCorruptedError` when types aren't implemented.
-struct AnyDecodable: Decodable {
+public struct AnyDecodable: Decodable {
     let value: Any
 
-    init<T>(_ value: T?) {
+    public init<T>(_ value: T?) {
         self.value = value ?? ()
     }
 
-    init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
 
         if let value = try? container.decode(Bool.self) {
@@ -102,9 +102,9 @@ struct ToolCall: DecodableResponse {
     let function: AssistantFunction
 }
 
-struct AssistantFunction: DecodableResponse {
-    let name: String
-    let arguments: [String: AnyDecodable]
+public struct AssistantFunction: DecodableResponse {
+    public let name: String
+    public let arguments: [String: AnyDecodable]
 
     private enum CodingKeys: String, CodingKey {
         case name, arguments
@@ -119,7 +119,7 @@ struct AssistantFunction: DecodableResponse {
         self.arguments = arguments
     }
 
-    init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         name = try container.decode(String.self, forKey: .name)
         // arguments come back as a String formatted as an objec rather than direct object

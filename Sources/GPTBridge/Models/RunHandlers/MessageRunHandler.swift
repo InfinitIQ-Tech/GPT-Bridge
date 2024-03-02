@@ -23,7 +23,7 @@ class MessageRunHandler: RunHandler {
     private var messageId: String?
     /// the AI's generated message
     /// - NOTE: this will be nil until `handle()` completes
-    var message: String?
+    public var message: String?
 
     init(runThreadResponse: RunThreadResponse, runID: String, threadID: String) {
         self.runThreadResponse = runThreadResponse
