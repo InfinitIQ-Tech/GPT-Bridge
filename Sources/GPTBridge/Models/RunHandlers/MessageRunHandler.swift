@@ -42,13 +42,13 @@ class MessageRunHandler: RunHandler {
     /// Get the message ID from the Thread Run's steps
     @discardableResult
     private func getMessageID() async throws -> String {
-        let messageId = try await GPTBridge().getMessageId(threadId: threadID, runId: runID)
+        let messageId = try await GPTBridge.getMessageId(threadId: threadID, runId: runID)
         self.messageId = messageId
         return messageId
     }
     /// Get the message text from the thread's `messages` array, given the message's ID
     private func getMessageText() async throws -> String {
         guard let messageID = messageId else { throw Error.noMessageId }
-        return try await GPTBridge().getMessageText(threadId: threadID, messageId: messageID)
+        return try await GPTBridge.getMessageText(threadId: threadID, messageId: messageID)
     }
 }

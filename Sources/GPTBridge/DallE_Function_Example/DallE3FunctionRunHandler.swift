@@ -34,7 +34,7 @@ class DallEFunctionRunHandler: FunctionRunHandlable {
     init(runThreadResponse: RunThreadResponse) {
         self.runThreadResponse = runThreadResponse
         self.requiredAction = runThreadResponse.requiredAction
-        self.functionParameters = try? parse() as? [String : AnyDecodable]
+        self.functionParameters = try? parse()
     }
     
     /// Generate an image

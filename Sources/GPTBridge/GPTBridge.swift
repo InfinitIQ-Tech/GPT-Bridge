@@ -13,18 +13,18 @@ public class GPTBridge {
         case emptyMessageResponseDate
     }
 
-    private let requestManager = RequestManager()
+    private static let requestManager = RequestManager()
 
     /// Create a thread to converse with the assistant
     /// - Returns: The thread's ID
-    public func createThread() async throws -> String {
+    public static func createThread() async throws -> String {
         let createThreadRequestData: CreateThreadRequest? = CreateThreadRequest()
         let response: CreateThreadResponse = try await requestManager
             .makeRequest(endpoint: .threads, method: .POST, requestData: createThreadRequestData)
         return response.id
     }
 
-    public func addMessageToThread(message: String, threadId: String, role: Role = .user) async throws {
+    public static func addMessageToThread(message: String, threadId: String, role: Role = .user) async throws {
         let messageRequestData: AddMessageToThreadRequest = .init(role: role, content: message)
         do {
             let _: AddMessageToThreadResponse? = try await requestManager
@@ -47,7 +47,7 @@ public class GPTBridge {
     /// Create a run in a thread
     /// - Parameter threadId: The threadId of the run to create
     /// - Returns: The created Run's ID
-    public func createRun(threadId: String) async throws -> String {
+    public static func createRun(threadId: String) async throws -> String {
         // MARK: Create the run
         let runRequestData: CreateThreadRunRequest = CreateThreadRunRequest()
         let runResponse: RunThreadResponse = try await requestManager
@@ -70,7 +70,7 @@ public class GPTBridge {
     /// - Returns: An instance of a `RunStepResult` implementation based on the final status of the run. If the assistant runs functions, their propertries will be available in the `functions` property of the `RunStepResult`. Otherwise, if the assistant sends a message back or there's an error, the `message` propperty will contain a String
     ///
     /// - Note: This function uses `Task.sleep(nanoseconds: 500_000_000)` to introduce a delay of 0.5 seconds between each poll, to prevent overwhelming the server with requests.
-    public func pollRunStatus(threadId: String, runId: String) async throws -> RunStepResult {
+    public static func pollRunStatus(threadId: String, runId: String) async throws -> RunStepResult {
         let runLoopRequestData: RunThreadRequest? = RunThreadRequest()
         let completedStatuses: [RunThreadResponse.Status] = [
             RunThreadResponse.Status.completed,
@@ -110,7 +110,7 @@ public class GPTBridge {
         }
     }
 
-    func getMessageId(threadId: String, runId: String) async throws -> String { // TODO: Move to MessageRunHandler
+    static func getMessageId(threadId: String, runId: String) async throws -> String { // TODO: Move to MessageRunHandler
         let endpoint = AssistantEndpoint.getMessageId(threadId: threadId, runId: runId)
         let requestData: MessageIdRequest? = MessageIdRequest()
         let messageResponse: MessageResponse = try await requestManager.makeRequest(endpoint: endpoint, method: .GET, requestData: requestData)
@@ -118,7 +118,7 @@ public class GPTBridge {
         return messageResponse.data[0].stepDetails.messageCreation.messageId
     }
 
-    func getMessageText(threadId: String, messageId: String) async throws -> String { // TODO: Move to MessageRunHandler
+    static func getMessageText(threadId: String, messageId: String) async throws -> String { // TODO: Move to MessageRunHandler
         let endpoint = AssistantEndpoint.getMessageText(threadId: threadId, messageId: messageId)
         let requestData: MessageTextRequest? = MessageTextRequest()
         let messageTextResponse: MessageContent = try await requestManager.makeRequest(endpoint: endpoint, method: .GET, requestData: requestData)
