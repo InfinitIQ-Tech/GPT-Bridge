@@ -17,19 +17,21 @@ import XCTest
 
 final class FunctionRunHandlerTests: XCTestCase {
 
-    private let prompt = "An Image or something"
-    private let photoName = "An Image"
+    let testArgs = AssistantFunction(name: "Test", arguments: ["argument1": AnyDecodable("foo"), "argument2": AnyDecodable(2)])
 
-    private var dalle3Args: DallE3FunctionArguments {
-        DallE3FunctionArguments(prompt: prompt, 
-                                photoName: photoName)
-    }
+    func testFunctionArguments_areDecodable() throws {
+        let jsonString = """
+                         {
+                         "name": "Test",
+                         "arguments": "{\\"argument1\\": \\"foo\\", \\"argument2\\": 2}"
+                         }
+                         """
+        let function = try toInstance(from: jsonString, to: AssistantFunction.self)
+        XCTAssertEqual(function.name, testArgs.name)
+        for argument in testArgs.arguments {
+            XCTAssert(function.arguments[argument.key]?.value as? String == argument.value.value as? String)
+        }
 
-    func testDallE3Arguments_areDecodable() throws {
-        let jsonString = try toJSONString(from: dalle3Args)
-        let instance = try toInstance(from: jsonString, to: DallE3FunctionArguments.self, usingKeyDecodingStrategy: .useDefaultKeys) // useDefaultKeys because struct is using snake_case in CodingKeys
-        XCTAssertEqual(instance.prompt, prompt)
-        XCTAssertEqual(instance.photoName, photoName)
     }
 
 }
