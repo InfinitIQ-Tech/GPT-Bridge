@@ -30,7 +30,7 @@ import Foundation
 /// and `Dictionary<String, AnyDecodable>`.
 /// - Throws: `DecodingError.dataCorruptedError` when types aren't implemented.
 public struct AnyDecodable: Decodable {
-    let value: Any
+    public let value: Any
 
     public init<T>(_ value: T?) {
         self.value = value ?? ()
