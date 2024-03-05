@@ -6,7 +6,38 @@
 //
 
 import Foundation
-
+/// > Getting Started
+/// >
+/// > To get started, create a secrets.xcconfig file in your project with the following keys and values:
+/// >
+/// > - ```assistantKey=your-assistantKey```
+/// > - ```openAIAPIKey=sk-something```
+///
+/// > Conversing with the bot
+/// > 1. Create a thread
+/// > 
+/// > ```let threadId = GPTBridge.createThread()```
+/// >
+/// > 2. Add a message to the thread
+/// >
+/// > ```GPTBridge.addMessageToThread(message: "Message from user", threadId: threadId, role: .user)```
+/// >
+/// > 3. Create a Run - this is where the assistant determines how to respond and/or which tools to use
+/// >
+/// > ```let runId = GPTBridge.createRun(threadId: threadId)```
+/// > - NOTE: only 1 run can be active in a thread at once
+/// >
+/// > 4. Poll for run status - wait for the assistant to come back with a response
+/// >
+/// > `GPTBridge.pollRunStatus(runId: runId`)
+/// >
+/// > 5. Handle the response.
+/// >
+/// > - If tools were run, the `functions` parameter of the returned `RunStepResult` will be populated
+/// >
+/// > - If a message was generated, the `message` parameter of the returned `RunStepResult` will be populated
+/// >
+/// > - NOTE: Both `functions` and `message` should never be populated
 public class GPTBridge {
     public enum Error: Swift.Error {
         case nilRunResponse
@@ -24,6 +55,7 @@ public class GPTBridge {
         return response.id
     }
 
+    /// Add a message to a thread
     public static func addMessageToThread(message: String, threadId: String, role: Role = .user) async throws {
         let messageRequestData: AddMessageToThreadRequest = .init(role: role, content: message)
         do {
