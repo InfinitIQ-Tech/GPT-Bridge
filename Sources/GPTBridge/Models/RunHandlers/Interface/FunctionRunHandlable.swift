@@ -9,8 +9,8 @@ import Foundation
 
 protocol FunctionRunHandlable: RunHandler {
     var requiredAction: RequiredAction? { get }
-    func parse() throws -> [String: AnyDecodable]
-    var functionParameters: [String: AnyDecodable]? { get }
+    func parse() throws -> [String: FunctionArgument]
+    var functionParameters: [String: FunctionArgument]? { get }
 }
 
 extension FunctionRunHandlable {
@@ -18,7 +18,7 @@ extension FunctionRunHandlable {
         NSError(domain: "noActionRetrievedError", code: 0, userInfo: nil)
     }
 
-    func parse() throws -> [String: AnyDecodable] {
+    func parse() throws -> [String: FunctionArgument] {
        guard let action = requiredAction,
              action.submitToolOutputs.toolCalls.count > 0
        else {

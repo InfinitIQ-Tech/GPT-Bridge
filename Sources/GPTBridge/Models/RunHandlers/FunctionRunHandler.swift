@@ -8,8 +8,8 @@
 import Foundation
 
 class FunctionRunHandler: FunctionRunHandlable {
-    var functionParameters: [String : AnyDecodable]?
-    
+    var functionParameters: [String : FunctionArgument]?
+
     var requiredAction: RequiredAction?
     
     var runThreadResponse: RunThreadResponse

@@ -16,8 +16,7 @@ import XCTest
 //}
 
 final class FunctionRunHandlerTests: XCTestCase {
-
-    let testArgs = AssistantFunction(name: "Test", arguments: ["argument1": AnyDecodable("foo"), "argument2": AnyDecodable(2)])
+    let testArgs = AssistantFunction(name: "Test", arguments: ["argument1": FunctionArgument("foo"), "argument2": FunctionArgument(2)])
 
     func testFunctionArguments_areDecodable() throws {
         let jsonString = """
@@ -29,7 +28,7 @@ final class FunctionRunHandlerTests: XCTestCase {
         let function = try toInstance(from: jsonString, to: AssistantFunction.self)
         XCTAssertEqual(function.name, testArgs.name)
         for argument in testArgs.arguments {
-            XCTAssert(function.arguments[argument.key]?.value as? String == argument.value.value as? String)
+            XCTAssert(function.arguments[argument.key]?.asString == argument.value.asString)
         }
 
     }

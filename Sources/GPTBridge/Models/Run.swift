@@ -29,10 +29,12 @@ import Foundation
 /// - Note: This struct only tries to decode the data into `Bool`, `Int`, `Double`, `String`, `Array<AnyDecodable>`,
 /// and `Dictionary<String, AnyDecodable>`.
 /// - Throws: `DecodingError.dataCorruptedError` when types aren't implemented.
-public struct AnyDecodable: Decodable {
-    public let value: Any
+public struct FunctionArgument: Decodable {
+    // while Any is typically frowned upon in Swift, this is strictly for backing and is fenced-in by Decodable initializers
+    private let value: Any
 
-    public init<T>(_ value: T?) {
+    /// Internal init for unit testing
+    init<T: Decodable>(_ value: T?) {
         self.value = value ?? ()
     }
 
@@ -47,13 +49,37 @@ public struct AnyDecodable: Decodable {
             self.init(value)
         } else if let value = try? container.decode(String.self) {
             self.init(value)
-        } else if let value = try? container.decode([AnyDecodable].self) {
+        } else if let value = try? container.decode([FunctionArgument].self) {
             self.init(value)
-        } else if let value = try? container.decode([String: AnyDecodable].self) {
+        } else if let value = try? container.decode([String: FunctionArgument].self) {
             self.init(value)
         } else {
-            throw DecodingError.dataCorruptedError(in: container, debugDescription: "Cannot decode value")
+            throw DecodingError.dataCorruptedError(in: container, debugDescription: "Coding Path: '\(container.codingPath)' contains an unimplemented type")
         }
+    }
+
+    public var asString: String? {
+        value as? String
+    }
+
+    public var asInt: Int? {
+        value as? Int
+    }
+
+    public var asDouble: Double? {
+        value as? Double
+    }
+
+    public var asBool: Bool? {
+        value as? Bool
+    }
+
+    public var asStringDecodableDictionary: [String: FunctionArgument]? {
+        value as? [String: FunctionArgument]
+    }
+
+    init(value: Decodable) {
+        self.value = value
     }
 }
 
@@ -104,7 +130,7 @@ struct ToolCall: DecodableResponse {
 
 public struct AssistantFunction: DecodableResponse {
     public let name: String
-    public let arguments: [String: AnyDecodable]
+    public let arguments: [String: FunctionArgument]
 
     private enum CodingKeys: String, CodingKey {
         case name, arguments
@@ -114,7 +140,7 @@ public struct AssistantFunction: DecodableResponse {
         case stringDataNotValidJSON(decodingError: DecodingError)
     }
 
-    init(name: String, arguments: [String: AnyDecodable]) {
+    init(name: String, arguments: [String: FunctionArgument]) {
         self.name = name
         self.arguments = arguments
     }
@@ -131,7 +157,7 @@ public struct AssistantFunction: DecodableResponse {
             throw Error.stringDataNotValidJSON(decodingError: decodingError)
         }
 
-        arguments = try JSONDecoder().decode([String: AnyDecodable].self, from: data)
+        arguments = try JSONDecoder().decode([String: FunctionArgument].self, from: data)
     }
 }
 

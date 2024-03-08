@@ -18,7 +18,7 @@ class DallEFunctionRunHandler: FunctionRunHandlable {
         case noRequiredActionRetrieved
     }
 
-    var functionParameters: [String : AnyDecodable]?
+    var functionParameters: [String : FunctionArgument]?
     var requiredAction: RequiredAction?
     // MARK: RunHandler implementation
     var runThreadResponse: RunThreadResponse
@@ -47,9 +47,9 @@ class DallEFunctionRunHandler: FunctionRunHandlable {
     /// 3. Set self.imageUrl
     /// - Throws: `noRequiredActionRetrieved` on nil `requiredAction` or requiredAction's `toolCalls` array being empty
     func handle() async throws {
-        guard let prompt = functionParameters?["prompt"] as? String else { throw Error.badPrompt }
+        guard let prompt = functionParameters?["prompt"]?.asString else { throw Error.badPrompt }
         self.prompt = prompt
-        self.imageName = functionParameters?["photo_name"] as? String
+        self.imageName = functionParameters?["photo_name"]?.asString
         let dallEHandler = DallEHandler(prompt: prompt)
         self.imageUrl = try await dallEHandler.generateImage()
     }
