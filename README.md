@@ -2,7 +2,9 @@
 Welcome to GPT-Bridge! GPT-Bridge is a powerful, yet lightweight framework that bridges the gap between Swift and the OpenAI assistant's API.
 <details>
   <summary>Installation</summary>
+  
 Add the Swift Package via Swift Package Manager:
+
   - Navigate to the project navigator by clicking on the blue project icon on the top of the left sidebar.
   - Select your project, not the target, to open project settings.
   - Click on the Swift Packages tab near the center top of the window.
