@@ -8,10 +8,9 @@
 import Foundation
 /// > Getting Started
 /// >
-/// > To get started, create a secrets.xcconfig file in your project with the following keys and values:
+/// > To get started, run `appLaunch` with your OpenAI API key and assistant key
 /// >
-/// > - ```assistantKey=your-assistantKey```
-/// > - ```openAIAPIKey=sk-something```
+/// > - ```GPTBridge.appLaunch(openAIAPIKey: "sk-xxxx", assistantKey: "YOUR_ASSISTANT_KEY")```
 ///
 /// > Conversing with the bot
 /// > 1. Create a thread
