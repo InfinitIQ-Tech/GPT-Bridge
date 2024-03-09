@@ -12,11 +12,11 @@ Add any notes, gotchas, etc... delete if not used
 
 # Checklist
 **Required**
-- [] Implemented a unit test
-- [] Modified a unit test
-- [] Didn't require unit testing
+- [ ] Implemented a unit test
+- [ ] Modified a unit test
+- [ ] Didn't require unit testing
   - Explain briefly
 
 **Optional**
-- [] Added a 3rd-party dependency
-- [] Modified the public API
+- [ ] Added a 3rd-party dependency
+- [ ] Modified the public API
