@@ -46,6 +46,10 @@ public class GPTBridge {
 
     private static let requestManager = RequestManager()
 
+    public static func appLaunch(openAIAPIKey: String, assistantKey: String) {
+        GPTSecretsConfig.appLaunch(openAIAPIKey: openAIAPIKey, assistantKey: assistantKey)
+    }
+
     /// Create a thread to converse with the assistant
     /// - Returns: The thread's ID
     public static func createThread() async throws -> String {
