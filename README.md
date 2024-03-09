@@ -32,30 +32,33 @@ Add the Swift Package via Swift Package Manager:
 <details>
   <summary>Usage</summary>
 1. Create a thread
-  A thread holds messages from the user to the assistant and from the assistant to the user
+  
+  A thread holds messages from the user to the assistant and from the assistant to the user.
 
   ```swift
-  let threadId = GPTBridge.createThread()
+  let threadId = try await GPTBridge.createThread()
   ```
 
-2. Add a message to the thread
+2. Add a message from the user to the thread
 
   ```swift
-  GPTBridge.addMessageToThread(message: "Message from user", threadId: threadId, role: .user)
+  try await GPTBridge.addMessageToThread(message: "Message from user", threadId: threadId, role: .user)
   ```
 
-3. Create a Run - this is where the assistant determines how to respond and/or which tools to use
+3. Create a Run 
+
+  A run is where an assistant determines what tools to run and runs them. If no tools are run, the assistant generates a message
 
   ```swift
-  let runId = GPTBridge.createRun(threadId: threadId)
+  let runId = try await GPTBridge.createRun(threadId: threadId)
   ```
 
-  - NOTE: only 1 run can be active in a thread at once
+  - NOTE: only 1 run can be active in a thread at once. If a run is active and another is created, the previous run will be cancelled.
 
-4. Poll for run status - wait for the assistant to come back with a response
+4. Poll for run status - wait for the assistant to use tools and/or come back with a response
 
   ```swift
-  GPTBridge.pollRunStatus(runId: runId)
+  let runStepResult = try await GPTBridge.pollRunStatus(runId: runId)
   ```
 
 5. Handle the response.
@@ -64,7 +67,7 @@ Add the Swift Package via Swift Package Manager:
     
   - If a message was generated, the `message` parameter of the returned `RunStepResult` will be populated
   
-  - NOTE: Both `functions` and `message` should never be populated, but may be in future versions
+  - NOTE: Both `functions` and `message` should never be populated in this version, but may be in future versions
 
   ```swift
   // Check if the assistant performed any actions that resulted in functions being executed
