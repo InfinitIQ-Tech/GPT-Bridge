@@ -139,9 +139,11 @@ public class GPTBridge {
             return FunctionRunStepResult(functions: functions)
         } else if [RunThreadResponse.Status.cancelled, .cancelling, .expired, .failed].contains(loopStatus) {
             let failedRunHandler = FailedRunHandler(runThreadResponse: currentRunResponse)
+            try await failedRunHandler.handle()
             return MessageRunStepResult(message: failedRunHandler.lastError.localizedString) // TODO: Anti-pattern. create FailedRunStepResult
         } else {
             let messageHandler = MessageRunHandler(runThreadResponse: currentRunResponse, runID: runId, threadID: threadId)
+            try await messageHandler.handle()
             return MessageRunStepResult(message: messageHandler.message ?? "")
         }
     }
