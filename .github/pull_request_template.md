@@ -16,6 +16,7 @@ Add any notes, gotchas, etc... delete if not used
 - [ ] Modified a unit test
 - [ ] Didn't require unit testing
   - Explain briefly:
+  - Explain briefly
 
 **Optional**
 - [ ] Added a 3rd-party dependency
