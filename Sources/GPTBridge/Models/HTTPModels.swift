@@ -71,7 +71,7 @@ struct OpenAIHeaders {
 
     private static var authorizationHeaders: HeaderGroup {
         HeaderGroup(headers: [
-            "Authorization": "Bearer \(Environment.openAIAPIKey)"
+            "Authorization": "Bearer \(GPTSecretsConfig.openAIAPIKey)"
         ])
     }
 

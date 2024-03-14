@@ -37,8 +37,3 @@ struct GPTSecretsConfig {
         self.assistantKey = assistantKey
     }
 }
-
-struct Environment {
-    static let openAIAPIKey = GPTSecretsConfig.openAIAPIKey
-    static let assistantKey = GPTSecretsConfig.assistantKey
-}
