@@ -8,7 +8,7 @@
 import XCTest
 
 protocol JSONTestable {
-    func toJSONString(from instance: Encodable, using keyEncodingStrategy: JSONEncoder.KeyEncodingStrategy, file: StaticString, line: UInt) throws -> String
+    func toJSONString(from instance: Any, file: StaticString, line: UInt) throws -> String
     func toInstance<T: Decodable>(from jsonString: String, to targetType: T.Type, usingKeyDecodingStrategy keyStrategy: JSONDecoder.KeyDecodingStrategy, file: StaticString, line: UInt) throws -> T
 }
 
@@ -36,11 +36,33 @@ extension JSONTestable {
         }
     }
 
-    func toJSONString(from instance: Encodable, using keyEncodingStrategy: JSONEncoder.KeyEncodingStrategy = .convertToSnakeCase, file: StaticString = #file, line: UInt = #line) throws -> String {
-        let encoder = JSONEncoder()
-        encoder.keyEncodingStrategy = keyEncodingStrategy
-        let data = try encoder.encode(instance)
-        return String(data: data, encoding: .utf8) ?? ""
+    private func toSnakeCaseDictionary(_ instance: Any) -> [String: Any] {
+        let mirror = Mirror(reflecting: instance)
+        var dict = [String: Any]()
+        for child in mirror.children {
+            if let key = child.label {
+                var convertedKey = ""
+                for char in key {
+                    if char.isUppercase {
+                        convertedKey.append("_" + char.lowercased())
+                    } else {
+                        convertedKey.append(char)
+                    }
+                }
+                dict[convertedKey] = child.value
+            }
+        }
+        return dict
+    }
+
+    func toJSONString(from instance: Any, file: StaticString = #file, line: UInt = #line) throws -> String {
+        let dict = toSnakeCaseDictionary(instance)
+        let data = try JSONSerialization.data(withJSONObject: dict, options: [])
+        guard let jsonString = String(data: data, encoding: .utf8) else {
+            XCTFail("The instance couldn't be converted to data", file: file, line: line)
+            throw JSONError.invalidJSONData
+        }
+        return jsonString
     }
 }
 
@@ -71,7 +93,7 @@ class JSONTestAbleTests: XCTestCase {
     }
 
     func testToJSONString() throws {
-        let string = try toJSONString(from: testInstance, using: .convertToSnakeCase)
+        let string = try toJSONString(from: testInstance)
         XCTAssert(string.contains("\"a_string\":\"test\""))
         XCTAssert(string.contains("\"num\":1"))
     }

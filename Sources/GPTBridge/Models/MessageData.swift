@@ -7,7 +7,7 @@
 
 import Foundation
 /// The role of the message sender
-enum Role: String, EncodableRequest {
+public enum Role: String, EncodableRequest {
     case user
     case assistant
 }
