@@ -7,9 +7,85 @@
 
 import Foundation
 
+/// Wrapper struct for `Decodable`
+///
+/// Decodes input data into various concrete types, and if successful, stores the value as
+/// an `Any` type.
+///
+/// Example usage:
+/// ```swift
+/// let jsonData = ... // Some JSON data as Data
+/// let decoder = JSONDecoder()
+/// let anyDecodable = try decoder.decode(AnyDecodable.self, from: jsonData)
+/// ```
+///
+/// Then, the underlying value can be accessed and cast to the expected type:
+/// ```swift
+/// if let intValue = anyDecodable.value as? Int {
+///     print("Decoded integer: \(intValue)")
+/// }
+/// ```
+///
+/// - Note: This struct only tries to decode the data into `Bool`, `Int`, `Double`, `String`, `Array<AnyDecodable>`,
+/// and `Dictionary<String, AnyDecodable>`.
+/// - Throws: `DecodingError.dataCorruptedError` when types aren't implemented.
+public struct FunctionArgument: Decodable {
+    // while Any is typically frowned upon in Swift, this is strictly for backing and is fenced-in by Decodable initializers
+    private let value: Any
+
+    /// Internal init for unit testing
+    init<T: Decodable>(_ value: T?) {
+        self.value = value ?? ()
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+
+        if let value = try? container.decode(Bool.self) {
+            self.init(value)
+        } else if let value = try? container.decode(Int.self) {
+            self.init(value)
+        } else if let value = try? container.decode(Double.self) {
+            self.init(value)
+        } else if let value = try? container.decode(String.self) {
+            self.init(value)
+        } else if let value = try? container.decode([FunctionArgument].self) {
+            self.init(value)
+        } else if let value = try? container.decode([String: FunctionArgument].self) {
+            self.init(value)
+        } else {
+            throw DecodingError.dataCorruptedError(in: container, debugDescription: "Coding Path: '\(container.codingPath)' contains an unimplemented type")
+        }
+    }
+
+    public var asString: String? {
+        value as? String
+    }
+
+    public var asInt: Int? {
+        value as? Int
+    }
+
+    public var asDouble: Double? {
+        value as? Double
+    }
+
+    public var asBool: Bool? {
+        value as? Bool
+    }
+
+    public var asStringDecodableDictionary: [String: FunctionArgument]? {
+        value as? [String: FunctionArgument]
+    }
+
+    init(value: Decodable) {
+        self.value = value
+    }
+}
+
 /// Headers and JSON body for creating thread runs
 struct CreateThreadRunRequest: EncodableRequest {
-    var assistantId: String = Environment.assistantKey
+    var assistantId: String = GPTSecretsConfig.assistantKey
 }
 
 /// JSON body for AI function/tool usage
@@ -52,9 +128,9 @@ struct ToolCall: DecodableResponse {
     let function: AssistantFunction
 }
 
-struct AssistantFunction: DecodableResponse {
-    let name: String
-    let arguments: DallE3FunctionArguments
+public struct AssistantFunction: DecodableResponse {
+    public let name: String
+    public let arguments: [String: FunctionArgument]
 
     private enum CodingKeys: String, CodingKey {
         case name, arguments
@@ -64,23 +140,24 @@ struct AssistantFunction: DecodableResponse {
         case stringDataNotValidJSON(decodingError: DecodingError)
     }
 
-    init(name: String, arguments: DallE3FunctionArguments) {
+    init(name: String, arguments: [String: FunctionArgument]) {
         self.name = name
         self.arguments = arguments
     }
 
-    init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         name = try container.decode(String.self, forKey: .name)
         // arguments come back as a String formatted as an objec rather than direct object
         let argumentsString = try container.decode(String.self, forKey: .arguments)
+        
         guard let data = argumentsString.data(using: .utf8) else {
             let decodingError = DecodingError.dataCorruptedError(forKey: .arguments, in: container, debugDescription: "Cannot convert argument String to Data")
             print("Decoding Error: \(decodingError)")
             throw Error.stringDataNotValidJSON(decodingError: decodingError)
         }
 
-        arguments = try JSONDecoder().decode(DallE3FunctionArguments.self, from: data)
+        arguments = try JSONDecoder().decode([String: FunctionArgument].self, from: data)
     }
 }
 
