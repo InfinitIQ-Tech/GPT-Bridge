@@ -13,9 +13,9 @@ struct ListAssistantsResponse: DecodableResponse {
 }
 
 public struct Assistant: Codable {
-    let id: String
-    let name: String
-    let description: String?
-    let model: String
-    let instructions: String
+    public let id: String
+    public let name: String
+    public let description: String?
+    public let model: String
+    public let instructions: String
 }
