@@ -147,6 +147,13 @@ public class GPTBridge {
         }
     }
 
+    public static func listAssistants() async throws -> [Assistant] {
+        let listAssistantRequest = ListAssistantsRequest()
+        let listAssistantsResponse: ListAssistantsResponse = try await requestManager
+            .makeRequest(endpoint: .listAssistants, method: .GET, requestData: listAssistantRequest)
+        return listAssistantsResponse.data
+    }
+
     static func getMessageId(threadId: String, runId: String) async throws -> String { // TODO: Move to MessageRunHandler
         let endpoint = AssistantEndpoint.getMessageId(threadId: threadId, runId: runId)
         let requestData: MessageIdRequest? = MessageIdRequest()
