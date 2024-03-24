@@ -19,4 +19,11 @@ class ListAssistantsTests: XCTestCase {
         XCTAssertEqual(decodedAssistant, testAssistant)
     }
 
+    func testAssistantsResponse_canBeDecoded() throws {
+        let testResponse = ListAssistantsResponse(data: [testAssistant, testAssistant])
+        let responseJSONString = try toJSONString(from: testResponse)
+        let decodedResponse = try toInstance(from: responseJSONString, to: ListAssistantsResponse.self)
+        XCTAssertEqual(decodedResponse.data[0], testAssistant)
+        XCTAssertEqual(decodedResponse.data[1], testAssistant)
+    }
 }
