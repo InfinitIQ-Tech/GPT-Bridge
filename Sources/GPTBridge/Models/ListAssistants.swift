@@ -12,7 +12,7 @@ struct ListAssistantsResponse: DecodableResponse {
     let data: [Assistant]
 }
 
-public struct Assistant: Codable {
+public struct Assistant: Codable, Equatable {
     public let id: String
     public let name: String
     public let description: String?
