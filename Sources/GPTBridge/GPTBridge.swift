@@ -146,6 +146,17 @@ public class GPTBridge {
             return MessageRunStepResult(message: messageHandler.message ?? "")
         }
     }
+    /// List assistants in `orgId`
+    /// - NOTE: If no `orgId` is provided, your OpenAI account's default `org_id` is used
+    public static func listAssistants(orgId: String? = nil) async throws -> [Assistant] {
+        if let orgId {
+            GPTSecretsConfig.setOrgId(orgId: orgId)
+        }
+        let listAssistantRequest = ListAssistantsRequest()
+        let listAssistantsResponse: ListAssistantsResponse = try await requestManager
+            .makeRequest(endpoint: .listAssistants, method: .GET, requestData: listAssistantRequest)
+        return listAssistantsResponse.data
+    }
 
     static func getMessageId(threadId: String, runId: String) async throws -> String { // TODO: Move to MessageRunHandler
         let endpoint = AssistantEndpoint.getMessageId(threadId: threadId, runId: runId)
