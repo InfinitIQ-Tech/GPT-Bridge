@@ -21,6 +21,7 @@ enum AssistantEndpoint {
     case getMessageId(threadId: String, runId: String)
     case getMessageText(threadId: String, messageId: String)
     case cancelRun(threadId: String, runId: String)
+    case listAssistants
 
     var rawValue: String {
         switch self {
@@ -38,6 +39,8 @@ enum AssistantEndpoint {
             messageEndpoint(threadId: threadId) + "/\(messageId)"
         case .cancelRun(let threadId, let runId):
             runEndpoint(threadId: threadId, runId: runId) + "/cancel"
+        case .listAssistants:
+            "/assistants"
         }
     }
 
@@ -81,10 +84,16 @@ struct OpenAIHeaders {
             "OpenAI-Beta": "assistants=v1"
         ])
     }
-    
+
     /// Standard headers for requests including a JSON payload/body
     static var jsonPayloadHeaders: [String: String] {
-        let headerGroups = [contentTypeHeaders, authorizationHeaders, openAIBetaHeaders]
+        var headerGroups = [contentTypeHeaders, authorizationHeaders, openAIBetaHeaders]
+
+        if let orgId = GPTSecretsConfig.orgId {
+            headerGroups.append(HeaderGroup(headers: [
+                "org_id": orgId
+            ]))
+        }
 
         let allHttpHeaders = headerGroups.reduce(into: [:]) { result, headerGroup in
             result.merge(headerGroup.headers) { (_, new) in new }

@@ -56,8 +56,58 @@ extension JSONTestable {
     }
 
     func toJSONString(from instance: Any, file: StaticString = #file, line: UInt = #line) throws -> String {
-        let dict = toSnakeCaseDictionary(instance)
-        let data = try JSONSerialization.data(withJSONObject: dict, options: [])
+        var dict = toSnakeCaseDictionary(instance)
+        var data: Data
+        if JSONSerialization.isValidJSONObject(dict) {
+            data = try JSONSerialization.data(withJSONObject: dict, options: [])
+        } else {
+            let mirror = Mirror(reflecting: dict)
+            dict = [:]
+            var returnKey = ""
+
+            for child in mirror.children {
+                // value should be a tuple due to prior conversion to dictionary
+                if let valueDict = child.value as? (String, Any) {
+                    returnKey = valueDict.0
+                    // this is a Swift type and fails serialization
+                    let swiftTypeInstance = valueDict.1
+                    let valueMirror = Mirror(reflecting: swiftTypeInstance)
+                    var propertyDict: [String: Any] = [:]
+
+                    for child in valueMirror.children {
+                        // property is directly serializable, add to propertyDict
+                        if let key = child.label,
+                           JSONSerialization.isValidJSONObject([key: child.value]) {
+                            propertyDict[key] = child.value
+                        } else {
+                            // property is not directly serializable, maybe another Swift type
+                            let swiftObjectJSONMirror = Mirror(reflecting: child.value)
+                            // put each property in a dictionary
+                            for child in swiftObjectJSONMirror.children {
+                                if let key = child.label {
+                                    // make sure data is still serializable
+                                    if JSONSerialization.isValidJSONObject([key: child.value]) {
+                                        propertyDict[key] = child.value
+                                    }
+                                }
+                            }
+                        }
+                        // Note: Assumes property is an array
+                        if dict[returnKey] != nil,
+                           var array = dict[returnKey] as? [Any] {
+                            array.append(propertyDict)
+                            dict[returnKey] = array
+                        } else {
+                            dict[returnKey] = [propertyDict]
+                        }
+                        propertyDict = [:]
+                    }
+                }
+            }
+
+            data = try JSONSerialization.data(withJSONObject: dict, options: [])
+
+        }
         guard let jsonString = String(data: data, encoding: .utf8) else {
             XCTFail("The instance couldn't be converted to data", file: file, line: line)
             throw JSONError.invalidJSONData
@@ -78,7 +128,7 @@ class JSONTestAbleTests: XCTestCase {
             lhs.num == rhs.num && lhs.aString == rhs.aString
         }
     }
-    
+
     let testInstance = JSONTest(num: 1, aString: "test")
     let validJSON = """
                     { "a_string":"test","num":1 }
