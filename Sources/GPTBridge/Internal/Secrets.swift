@@ -32,8 +32,14 @@ struct GPTSecretsConfig {
         }
     }
 
+    static var orgId: String?
+
     static func appLaunch(openAIAPIKey: String, assistantKey: String) {
         self.openAIAPIKey = openAIAPIKey
         self.assistantKey = assistantKey
+    }
+
+    static func setOrgId(orgId: String) {
+        self.orgId = orgId
     }
 }
