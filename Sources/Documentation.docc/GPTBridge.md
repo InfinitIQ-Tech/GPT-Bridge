@@ -1,8 +1,12 @@
-# ``GPTBridge Usage``
+# ``GPTBridge``
 
-GPTBridge is a powerful tool that allows you to interact with Open AI GPTs, such as the "Maze Generator" assistant, which generates text for detailed, immersive maze adventures.
+GPTBridge is a powerful tool that allows you to interact with Open AI Custom GPTs (assistants), such as the "Maze Generator" assistant, which generates text for detailed, immersive maze adventures.
 
-## Maze Generator Assistant
+## Topics
+
+### Usage
+
+#### Maze Generator Assistant
 
 The assistant has these instructions:
 
@@ -40,7 +44,7 @@ The assistant also has a function "exits" which outputs the current room's exits
 }
 ```
 
-## Getting Started
+#### Getting Started
 
 To get started, you need to provide your OpenAI API key and assistant key. This is recommended at app launch and required before making any calls using GPTBridge:
 
@@ -48,7 +52,7 @@ To get started, you need to provide your OpenAI API key and assistant key. This 
 GPTBridge.appLaunch(openAIAPIKey: "your_openai_api_key", assistantKey: "your_assistant_key")
 ```
 
-## Creating a Thread
+#### Creating a Thread
 
 To begin a conversation with the assistant, create a new thread:
 
@@ -56,7 +60,7 @@ To begin a conversation with the assistant, create a new thread:
 let threadId = try await GPTBridge.createThread()
 ```
 
-## Adding Messages to the Thread
+#### Adding Messages to the Thread
 
 You can add messages to the thread using the `addMessageToThread` function:
 
@@ -64,7 +68,7 @@ You can add messages to the thread using the `addMessageToThread` function:
 try await GPTBridge.addMessageToThread(message: "Generate the maze's first room", threadId: threadId)
 ```
 
-## Creating a Run
+#### Creating a Run
 
 To get the assistant to process the thread (including previous messages and function results up to the context limit), create a new run:
 
@@ -72,7 +76,7 @@ To get the assistant to process the thread (including previous messages and func
 let runId = try await GPTBridge.createRun(threadId: threadId)
 ```
 
-## Polling for Run Status
+#### Polling for Run Status
 
 The assistant takes some time to process the run and may choose to use tools (functions), generate a message, retrieve a file it has stored in its knowledgebase, or a combination. After creating a run, poll for the run status to retrieve the assistant's response:
 
@@ -82,7 +86,7 @@ let result = try await GPTBridge.pollRunStatus(threadId: threadId, runId: runId)
 
 The `pollRunStatus` function returns a `RunStepResult`, which can be either a `FunctionRunStepResult` or a `MessageRunStepResult`.
 
-## Handling Function Calls
+#### Handling Function Calls
 
 If the assistant requires additional information, it will return a `FunctionRunStepResult` containing the function call details. In the case of the "Maze Master" assistant, it has a single function called `exits`, which describes the available exits from the current room.
 
@@ -115,7 +119,7 @@ let nextRoomResult = try await GPTBridge.submitToolOutputs(
 )
 ```
 
-## Handling Assistant Messages
+#### Handling Assistant Messages
 
 If the assistant generates a message response, it will be returned in the `RunStepResult`. You can access the message like this:
 
