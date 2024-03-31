@@ -2,7 +2,7 @@
 
 GPTBridge is a powerful tool that allows you to interact with Open AI Custom GPTs (assistants), such as the "Maze Generator" assistant, which generates text for detailed, immersive maze adventures.
 
-## Topics
+## Overview
 
 ### Usage
 
@@ -10,15 +10,25 @@ GPTBridge is a powerful tool that allows you to interact with Open AI Custom GPT
 
 The assistant has these instructions:
 
-"""
-You are 'Maze Master'. You are an expert in weaving an interactive adventure within a nearly endless dungeon maze, focusing on rich, detailed descriptions of magical and medieval environments.
+```
+You are 'Maze Master'. You are an expert in weaving an interactive 
+adventure within a nearly endless dungeon maze, focusing on rich, 
+detailed descriptions of magical and medieval environments.
 
-The GPT blends realistic medieval elements with magical aspects, creating a sense of wonder and intrigue. It provides vivid descriptions and images of locations, architectures, and magical elements, guiding users through a complex, ever-changing maze.
+The GPT blends realistic medieval elements with magical aspects, 
+creating a sense of wonder and intrigue. It provides vivid descriptions 
+and images of locations, architectures, and magical elements, guiding 
+users through a complex, ever-changing maze.
 
-The interaction style is mysterious and enigmatic, enhancing the sense of discovery and adventure. Maze Master's storytelling is formal, with a tone that adds to the mystique of the dungeon, making each narrative and choice part of an immersive and enigmatic experience.
+The interaction style is mysterious and enigmatic, enhancing the sense 
+of discovery and adventure. Maze Master's storytelling is formal, with 
+a tone that adds to the mystique of the dungeon, making each narrative 
+and choice part of an immersive and enigmatic experience.
 
-You will describe the room the user is in followed by descriptions of “exits” they can take from that room.
-"""
+You will describe the room the user is in followed by descriptions 
+of “exits” they can take from that room.
+
+```
 
 The assistant also has a function "exits" which outputs the current room's exits in a string array, such as `["N", "S", "E"]`
 
@@ -49,7 +59,8 @@ The assistant also has a function "exits" which outputs the current room's exits
 To get started, you need to provide your OpenAI API key and assistant key. This is recommended at app launch and required before making any calls using GPTBridge:
 
 ```
-GPTBridge.appLaunch(openAIAPIKey: "your_openai_api_key", assistantKey: "your_assistant_key")
+GPTBridge.appLaunch(openAIAPIKey: "your_openai_api_key", 
+                    assistantKey: "your_assistant_key")
 ```
 
 #### Creating a Thread
@@ -65,7 +76,8 @@ let threadId = try await GPTBridge.createThread()
 You can add messages to the thread using the `addMessageToThread` function:
 
 ```
-try await GPTBridge.addMessageToThread(message: "Generate the maze's first room", threadId: threadId)
+try await GPTBridge.addMessageToThread(message: "Generate the maze's first room", 
+                                       threadId: threadId)
 ```
 
 #### Creating a Run
@@ -129,4 +141,4 @@ if let message = result.message {
 }
 ```
 
-By following these steps and handling the different types of results, you can engage in an interactive conversation with the "Maze Master" assistant, exploring the vast and mysterious maze it generates.
+By following these steps and handling the different types of results, you can engage in an interactive conversation with the "Maze Master" assistant, exploring the vast and mysterious maze it generates. Plug in your own assistant to create your own unique app with your own unique AI assistant!
