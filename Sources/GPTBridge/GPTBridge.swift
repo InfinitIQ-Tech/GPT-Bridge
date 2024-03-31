@@ -134,8 +134,16 @@ public class GPTBridge {
         }
 
         if loopStatus == .requiresAction {
-            let functions = currentRunResponse.requiredAction?.submitToolOutputs.toolCalls.compactMap { $0.function } ?? []
-            return FunctionRunStepResult(functions: functions)
+            guard let requiredAction = currentRunResponse.requiredAction else { throw Error.nilRunResponse }
+            let toolCalls = requiredAction.submitToolOutputs.toolCalls
+            let functions = requiredAction.submitToolOutputs.toolCalls.compactMap({ $0.function })
+            guard !functions.isEmpty,
+                  !toolCalls.isEmpty else {
+                throw Error.nilRunResponse
+            }
+
+            let toolCallId = toolCalls[0].id
+            return FunctionRunStepResult(toolCallId: toolCallId, functions: functions)
         } else if [RunThreadResponse.Status.cancelled, .cancelling, .expired, .failed].contains(loopStatus) {
             let failedRunHandler = FailedRunHandler(runThreadResponse: currentRunResponse)
             try await failedRunHandler.handle()
