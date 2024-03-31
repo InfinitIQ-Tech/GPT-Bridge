@@ -2,6 +2,8 @@
 
 GPTBridge is a powerful tool that allows you to interact with Open AI GPTs, such as the "Maze Generator" assistant, which generates text for detailed, immersive maze adventures.
 
+## Maze Generator Assistant
+
 The assistant has these instructions:
 
 """
@@ -15,6 +17,30 @@ You will describe the room the user is in followed by descriptions of â€œexitsâ€
 """
 
 The assistant also has a function "exits" which outputs the current room's exits in a string array, such as `["N", "S", "E"]`
+
+```
+{
+"name": "exits",
+"description": "Provide cardinal directions of all described exits",
+"parameters": {
+  "type": "object",
+  "properties": {
+    "exits": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "The cardinal directions of the available exits"
+    }
+  },
+  "required": [
+    "exits"
+  ]
+}
+}
+```
+
+## Getting Started
 
 To get started, you need to provide your OpenAI API key and assistant key. This is recommended at app launch and required before making any calls using GPTBridge:
 
