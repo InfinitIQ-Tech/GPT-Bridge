@@ -10,20 +10,20 @@ import Foundation
 /// >
 /// > To get started, run `appLaunch` with your OpenAI API key and assistant key
 /// >
-/// > - ```GPTBridge.appLaunch(openAIAPIKey: "sk-xxxx", assistantKey: "YOUR_ASSISTANT_KEY")```
+/// > - `GPTBridge.appLaunch(openAIAPIKey: "sk-xxxx", assistantKey: "YOUR_ASSISTANT_KEY")`
 ///
 /// > Conversing with the bot
 /// > 1. Create a thread
 /// > 
-/// > ```let threadId = GPTBridge.createThread()```
+/// > `let threadId = GPTBridge.createThread()`
 /// >
 /// > 2. Add a message to the thread
 /// >
-/// > ```GPTBridge.addMessageToThread(message: "Message from user", threadId: threadId, role: .user)```
+/// > `GPTBridge.addMessageToThread(message: "Message from user", threadId: threadId, role: .user)`
 /// >
 /// > 3. Create a Run - this is where the assistant determines how to respond and/or which tools to use
 /// >
-/// > ```let runId = GPTBridge.createRun(threadId: threadId)```
+/// > `let runId = GPTBridge.createRun(threadId: threadId)`
 /// > - NOTE: only 1 run can be active in a thread at once
 /// >
 /// > 4. Poll for run status - wait for the assistant to come back with a response
@@ -68,15 +68,21 @@ public class GPTBridge {
             if let requestError = error as? RequestError {
                 switch requestError {
                 case let .runAlreadyActive(runId):
-                    let cancelRunRequest = CancelRunRequest()
-                    let _: CancelRunResponse? = try await requestManager
-                        .makeRequest(endpoint: .cancelRun(threadId: threadId, runId: runId), method: .POST, requestData: cancelRunRequest)
+                    try await cancelRun(threadId: threadId, runId: runId)
                     try await addMessageToThread(message: message, threadId: threadId)
                 default:
                     throw Error.nilRunResponse
                 }
             }
         }
+    }
+
+    /// Cancel the current run manually
+    /// This is useful for reducing processing time in the OpenAI API when the assistant doesn't need to know the results of a function call
+    public static func cancelRun(threadId: String, runId: String) async throws {
+        let cancelRunRequest = CancelRunRequest()
+        let _: CancelRunResponse? = try await requestManager
+            .makeRequest(endpoint: .cancelRun(threadId: threadId, runId: runId), method: .POST, requestData: cancelRunRequest)
     }
 
     /// Create a run in a thread

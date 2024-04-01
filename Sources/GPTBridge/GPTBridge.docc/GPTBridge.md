@@ -4,7 +4,7 @@ GPTBridge is a powerful tool that allows you to interact with Open AI Custom GPT
 
 ## Overview
 
-### Usage
+### Usage Example (Maze App with unlimited generations)
 
 #### Maze Generator Assistant
 
