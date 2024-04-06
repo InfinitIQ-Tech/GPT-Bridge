@@ -180,16 +180,17 @@ public class GPTBridge {
     /// - Parameters:
     ///   - threadId: The ID of the thread associated with the run.
     ///   - runId: The ID of the run.
-    ///   - functionCallId: The `id` of the function call for which the outputs are being submitted.
-    ///   - toolOutputs: A dictionary containing the outputs from the tool call, where the keys are the output names and the values are `FunctionArgument` instances.
+    ///   - toolCallOutputs: The id of each function call and what you want the assistant to know about the result of the assistant's generated function
+    ///     - Example: The assistant generated a prompt for an image.
+    ///       - You sent this to a specialized image generation model that successfully generated an image.
+    ///       - You might set this to "success" or "200" or the user's reply
     ///
     /// - Returns: An instance of `RunStepResult` representing the next step in the run. This could be a `FunctionRunStepResult` if the assistant requires another tool call, or a `MessageRunStepResult` if the assistant has generated a final message.
     ///
     /// - Throws: An error if there was a problem submitting the tool outputs or polling for the next step in the run.
-    public static func submitToolOutputs(threadId: String, runId: String, functionCallId: String, toolOutputs: [String: FunctionArgument]) async throws -> RunStepResult {
+    public static func submitToolOutputs(threadId: String, runId: String, toolCallOutputs: [ToolCallOutput]) async throws -> RunStepResult {
         let endpoint = AssistantEndpoint.submitToolOutputs(threadId: threadId, runId: runId)
-        let toolCallOutput = ToolCallOutput(toolCallId: functionCallId, outputDictionary: toolOutputs)
-        let request = ToolCallRequest(toolOutputs: [toolCallOutput])
+        let request = ToolCallRequest(toolOutputs: toolCallOutputs)
         let _: RunThreadResponse = try await requestManager
             .makeRequest(endpoint: endpoint,
                          method: .POST,
@@ -201,8 +202,10 @@ public class GPTBridge {
         let endpoint = AssistantEndpoint.getMessageId(threadId: threadId, runId: runId)
         let requestData: MessageIdRequest? = MessageIdRequest()
         let messageResponse: MessageResponse = try await requestManager.makeRequest(endpoint: endpoint, method: .GET, requestData: requestData)
-        guard !messageResponse.data.isEmpty else { throw Error.emptyMessageResponseDate }
-        return messageResponse.data[0].stepDetails.messageCreation.messageId
+        guard !messageResponse.data.isEmpty,
+              let messageId = messageResponse.data[0].stepDetails.messageCreation?.messageId
+        else { throw Error.emptyMessageResponseDate }
+        return messageId
     }
 
     static func getMessageText(threadId: String, messageId: String) async throws -> String { // TODO: Move to MessageRunHandler

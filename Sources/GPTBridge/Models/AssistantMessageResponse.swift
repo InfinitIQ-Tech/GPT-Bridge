@@ -24,7 +24,8 @@ struct MessageCreation: DecodableResponse {
 }
 
 struct StepDetails: DecodableResponse {
-    let messageCreation: MessageCreation
+    let messageCreation: MessageCreation?
+    let toolCalls: [ToolCall]?
 }
 
 struct GetMessageResponse: DecodableResponse {
