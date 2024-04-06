@@ -21,7 +21,7 @@
 		AA770DA22BC113BE00D7FAE6 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		AA770DA42BC113BE00D7FAE6 /* My_GPT_Dashboard.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = My_GPT_Dashboard.entitlements; sourceTree = "<group>"; };
 		AA770DA62BC113BE00D7FAE6 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
-		AA770DAD2BC113F600D7FAE6 /* GPTBridge */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = GPTBridge; path = ../../..; sourceTree = "<group>"; };
+		AA770DAD2BC113F600D7FAE6 /* GPTBridge */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = GPTBridge; path = /Users/kennethdubroff/Development/Xcode_Development/Projects/GPTBridge; sourceTree = "<absolute>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */

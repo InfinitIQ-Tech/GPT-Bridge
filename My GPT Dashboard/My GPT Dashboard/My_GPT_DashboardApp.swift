@@ -18,9 +18,6 @@ struct My_GPT_DashboardApp: App {
                         Label("Assistants", systemImage: "person.2.badge.gearshape.fill")
                     }
             }
-            .task {
-                GPTBridge.appLaunch(openAIAPIKey: "my api key (sk-xxx)", assistantKey: "my assistant key (asst_xxxx")
-            }
         }
     }
 }
