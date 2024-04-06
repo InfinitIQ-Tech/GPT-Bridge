@@ -49,6 +49,18 @@ public class GPTBridge {
         GPTSecretsConfig.appLaunch(openAIAPIKey: openAIAPIKey, assistantKey: assistantKey)
     }
 
+    /// List assistants in `orgId`
+    /// - NOTE: If no `orgId` is provided, your OpenAI account's default `org_id` is used
+    public static func listAssistants(orgId: String? = nil) async throws -> [Assistant] {
+        if let orgId {
+            GPTSecretsConfig.setOrgId(orgId: orgId)
+        }
+        let listAssistantRequest = ListAssistantsRequest()
+        let listAssistantsResponse: ListAssistantsResponse = try await requestManager
+            .makeRequest(endpoint: .listAssistants, method: .GET, requestData: listAssistantRequest)
+        return listAssistantsResponse.data
+    }
+
     /// Create a thread to converse with the assistant
     /// - Returns: The thread's ID
     public static func createThread() async throws -> String {
@@ -75,14 +87,6 @@ public class GPTBridge {
                 }
             }
         }
-    }
-
-    /// Cancel the current run manually
-    /// This is useful for reducing processing time in the OpenAI API when the assistant doesn't need to know the results of a function call
-    public static func cancelRun(threadId: String, runId: String) async throws {
-        let cancelRunRequest = CancelRunRequest()
-        let _: CancelRunResponse? = try await requestManager
-            .makeRequest(endpoint: .cancelRun(threadId: threadId, runId: runId), method: .POST, requestData: cancelRunRequest)
     }
 
     /// Create a run in a thread
@@ -160,16 +164,37 @@ public class GPTBridge {
             return MessageRunStepResult(message: messageHandler.message ?? "")
         }
     }
-    /// List assistants in `orgId`
-    /// - NOTE: If no `orgId` is provided, your OpenAI account's default `org_id` is used
-    public static func listAssistants(orgId: String? = nil) async throws -> [Assistant] {
-        if let orgId {
-            GPTSecretsConfig.setOrgId(orgId: orgId)
-        }
-        let listAssistantRequest = ListAssistantsRequest()
-        let listAssistantsResponse: ListAssistantsResponse = try await requestManager
-            .makeRequest(endpoint: .listAssistants, method: .GET, requestData: listAssistantRequest)
-        return listAssistantsResponse.data
+
+    /// Cancel the current run manually
+    /// This is useful for reducing processing time in the OpenAI API when the assistant doesn't need to know the results of a function call
+    public static func cancelRun(threadId: String, runId: String) async throws {
+        let cancelRunRequest = CancelRunRequest()
+        let _: CancelRunResponse? = try await requestManager
+            .makeRequest(endpoint: .cancelRun(threadId: threadId, runId: runId), method: .POST, requestData: cancelRunRequest)
+    }
+
+    /// Submits the outputs from a function call to the assistant and polls for the next step in the run, which could be another tool call or a final message.
+    ///
+    /// This function is used when your app requires the assistant to process the result of you processing its function call.
+    ///
+    /// - Parameters:
+    ///   - threadId: The ID of the thread associated with the run.
+    ///   - runId: The ID of the run.
+    ///   - functionCallId: The `id` of the function call for which the outputs are being submitted.
+    ///   - toolOutputs: A dictionary containing the outputs from the tool call, where the keys are the output names and the values are `FunctionArgument` instances.
+    ///
+    /// - Returns: An instance of `RunStepResult` representing the next step in the run. This could be a `FunctionRunStepResult` if the assistant requires another tool call, or a `MessageRunStepResult` if the assistant has generated a final message.
+    ///
+    /// - Throws: An error if there was a problem submitting the tool outputs or polling for the next step in the run.
+    public static func submitToolOutputs(threadId: String, runId: String, functionCallId: String, toolOutputs: [String: FunctionArgument]) async throws -> RunStepResult {
+        let endpoint = AssistantEndpoint.submitToolOutputs(threadId: threadId, runId: runId)
+        let toolCallOutput = ToolCallOutput(toolCallId: functionCallId, outputDictionary: toolOutputs)
+        let request = ToolCallRequest(toolOutputs: [toolCallOutput])
+        let _: RunThreadResponse = try await requestManager
+            .makeRequest(endpoint: endpoint,
+                         method: .POST,
+                         requestData: request)
+        return try await pollRunStatus(threadId: threadId, runId: runId)
     }
 
     static func getMessageId(threadId: String, runId: String) async throws -> String { // TODO: Move to MessageRunHandler
