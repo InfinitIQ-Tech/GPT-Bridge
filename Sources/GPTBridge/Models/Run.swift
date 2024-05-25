@@ -7,7 +7,7 @@
 
 import Foundation
 
-/// Wrapper struct for `Decodable`
+/// Type-erased struct for `Decodable`
 ///
 /// Decodes input data into various concrete types, and if successful, stores the value as
 /// an `Any` type.
@@ -16,18 +16,18 @@ import Foundation
 /// ```swift
 /// let jsonData = ... // Some JSON data as Data
 /// let decoder = JSONDecoder()
-/// let anyDecodable = try decoder.decode(AnyDecodable.self, from: jsonData)
+/// let anyDecodable = try decoder.decode(FunctionArgument.self, from: jsonData)
 /// ```
 ///
 /// Then, the underlying value can be accessed and cast to the expected type:
 /// ```swift
-/// if let intValue = anyDecodable.value as? Int {
+/// if let intValue = anyDecodable.asInt {
 ///     print("Decoded integer: \(intValue)")
 /// }
 /// ```
 ///
-/// - Note: This struct only tries to decode the data into `Bool`, `Int`, `Double`, `String`, `Array<AnyDecodable>`,
-/// and `Dictionary<String, AnyDecodable>`.
+/// - Note: This struct only tries to decode the data into `Bool`, `Int`, `Double`, `String`, `Array<FunctionArgument>`,
+/// and `Dictionary<String, FunctionArgument>`.
 /// - Throws: `DecodingError.dataCorruptedError` when types aren't implemented.
 public struct FunctionArgument: Decodable {
     // while Any is typically frowned upon in Swift, this is strictly for backing and is fenced-in by Decodable initializers
@@ -76,10 +76,6 @@ public struct FunctionArgument: Decodable {
 
     public var asStringDecodableDictionary: [String: FunctionArgument]? {
         value as? [String: FunctionArgument]
-    }
-
-    init(value: Decodable) {
-        self.value = value
     }
 }
 
