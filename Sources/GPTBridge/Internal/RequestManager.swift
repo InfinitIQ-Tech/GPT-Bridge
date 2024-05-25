@@ -44,7 +44,7 @@ struct RequestManager {
                         let responseObject = try T.createInstanceFrom(data: data)
                         return responseObject
                     } catch {
-                        print("Error decoding data: \(String(data: data, encoding: .utf8))")
+                        print("Error decoding data: \(String(data: data, encoding: .utf8) ?? "Data couldn't be decoded to utf-8 String")")
                         throw error
                     }
                 } else if httpResponse.statusCode == 400 {
