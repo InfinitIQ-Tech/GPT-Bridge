@@ -29,12 +29,12 @@ import Foundation
 /// - Note: This struct only tries to decode the data into `Bool`, `Int`, `Double`, `String`, `Array<FunctionArgument>`,
 /// and `Dictionary<String, FunctionArgument>`.
 /// - Throws: `DecodingError.dataCorruptedError` when types aren't implemented.
-public struct FunctionArgument: Decodable {
+public struct FunctionArgument: Codable {
     // while Any is typically frowned upon in Swift, this is strictly for backing and is fenced-in by Decodable initializers
-    private let value: Any
+    let value: Any
 
     /// Internal init for unit testing
-    init<T: Decodable>(_ value: T?) {
+    init<T: Codable>(_ value: T?) {
         self.value = value ?? ()
     }
 
@@ -56,6 +56,17 @@ public struct FunctionArgument: Decodable {
         } else {
             throw DecodingError.dataCorruptedError(in: container, debugDescription: "Coding Path: '\(container.codingPath)' contains an unimplemented type")
         }
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        if let value = value as? Encodable {
+            try container.encode(value)
+        }
+    }
+
+    public func asArray() -> [FunctionArgument]? {
+        value as? [FunctionArgument]
     }
 
     public var asString: String? {
