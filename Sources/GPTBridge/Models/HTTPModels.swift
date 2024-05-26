@@ -22,6 +22,7 @@ enum AssistantEndpoint {
     case getMessageText(threadId: String, messageId: String)
     case cancelRun(threadId: String, runId: String)
     case listAssistants
+    case submitToolOutputs(threadId: String, runId: String)
 
     var rawValue: String {
         switch self {
@@ -41,6 +42,8 @@ enum AssistantEndpoint {
             runEndpoint(threadId: threadId, runId: runId) + "/cancel"
         case .listAssistants:
             "/assistants"
+        case .submitToolOutputs(let threadId, let runId):
+            runEndpoint(threadId: threadId, runId: runId) + "/submit_tool_outputs"
         }
     }
 
