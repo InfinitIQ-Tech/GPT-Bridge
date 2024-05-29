@@ -33,8 +33,6 @@ class ThreadResponseTests: XCTestCase {
             )
         )
 
-        print(testInstance.id)
-
         XCTAssertEqual(testInstance.id, testThreadResponse.id)
     }
 
