@@ -131,7 +131,6 @@ protocol EncodableRequest: Encodable {
 }
 
 extension EncodableRequest {
-
     /// Headers describing content type and including Bearer auth
     /// - NOTE: computed in order to prevent encoding parameter
     var jsonPayloadHeaders: [String: String] {
