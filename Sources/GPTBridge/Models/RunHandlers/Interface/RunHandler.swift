@@ -19,11 +19,13 @@ public protocol RunStepResult {
     var message: String? { get }
 }
 
-struct FunctionRunStepResult: RunStepResult {
-    var functions: [AssistantFunction]?
-    var message: String? = nil
+public struct FunctionRunStepResult: RunStepResult {
+    public let toolCallId: String
+    public let functions: [AssistantFunction]?
+    public let message: String? = nil
 
-    init(functions: [AssistantFunction]) {
+    init(toolCallId: String, functions: [AssistantFunction]) {
+        self.toolCallId = toolCallId
         self.functions = functions
     }
 }
