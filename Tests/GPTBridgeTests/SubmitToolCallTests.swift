@@ -37,6 +37,7 @@ class SubmitToolCallTests: XCTestCase {
                 to: RunThreadResponse.self
             )
         )
+        XCTAssertEqual(testInstance.id, testRunThreadResponse.id)
     }
 }
 
@@ -62,6 +63,10 @@ extension ToolCallOutput: Equatable {
 }
 
 extension XCTestCase {
+    var testRunThreadResponse: RunThreadResponse {
+        RunThreadResponse(id: "run_123", status: .queued, lastError: nil, requiredAction: nil)
+    }
+
     var runThreadResponseJSONString: String {
         """
           {
