@@ -37,7 +37,11 @@ struct MessageResponse: DecodableResponse {
 }
 
 /// headers for Messages
-struct AddMessageToThreadResponse: DecodableResponse {}
+struct AddMessageToThreadResponse: DecodableResponse {
+    let id: String
+    let content: [MessageTextObject]
+}
+
 struct CancelRunRequest: EncodableRequest {}
 struct CancelRunResponse: DecodableResponse {}
 struct MessageIdRequest: EncodableRequest {}
