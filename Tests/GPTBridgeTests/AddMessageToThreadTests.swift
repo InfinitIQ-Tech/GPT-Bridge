@@ -9,8 +9,20 @@ import XCTest
 @testable import GPTBridge
 
 class MessageRunHandlerTests: XCTestCase {
+    private var testMessageValue: MessageValue {
+        MessageValue(value: "How does AI work? Explain it in simple terms.")
+    }
+
     private var testMessageContent: MessageContent {
-        MessageContent(content: [MessageTextObject(text: MessageValue(value: "How does AI work? Explain it in simple terms."))])
+        MessageContent(content: [testMessageTextObject])
+    }
+
+    private var testMessageTextObject: MessageTextObject {
+        MessageTextObject(text: testMessageValue)
+    }
+
+    private var addMessageToThreadResponse: AddMessageToThreadResponse {
+        AddMessageToThreadResponse(id: "msg_abc123", content: testMessageContent.content)
     }
 
     private var testMessageContentResponseJSONString: String {
@@ -38,16 +50,17 @@ class MessageRunHandlerTests: XCTestCase {
         """
     }
 
-    func testMessageContent_canBeDecodedFromResponse() throws {
+    func testCreateMessageResponse_canBeDecoded() throws {
         let testInstance = try XCTUnwrap(
-            toInstance(from: testMessageContentResponseJSONString, to: MessageContent.self)
+            toInstance(from: testMessageContentResponseJSONString, to: AddMessageToThreadResponse.self)
         )
-        XCTAssertEqual(testInstance, testMessageContent)
+        XCTAssertEqual(testInstance.content, testMessageContent.content)
+        XCTAssertEqual(testInstance.id, addMessageToThreadResponse.id)
     }
 }
 
-extension MessageContent: Equatable {
-    public static func == (lhs: MessageContent, rhs: MessageContent) -> Bool {
-        lhs.content.first?.text.value == rhs.content.first?.text.value
+extension MessageTextObject: Equatable {
+    public static func == (lhs: MessageTextObject, rhs: MessageTextObject) -> Bool {
+        lhs.text.value == rhs.text.value
     }
 }
