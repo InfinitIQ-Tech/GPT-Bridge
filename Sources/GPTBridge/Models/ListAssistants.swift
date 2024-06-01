@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct ListAssistantsRequest: EncodableRequest {}
+typealias ListAssistantsRequest = EmptyEncodableRequest
 struct ListAssistantsResponse: DecodableResponse {
     public let firstId: String
     public let lastId: String

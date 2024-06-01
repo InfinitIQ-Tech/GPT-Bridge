@@ -143,3 +143,6 @@ extension EncodableRequest {
         return try encoder.encode(self)
     }
 }
+
+struct EmptyDecodableResponse: DecodableResponse {}
+struct EmptyEncodableRequest: EncodableRequest {}

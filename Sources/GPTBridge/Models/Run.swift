@@ -7,6 +7,9 @@
 
 import Foundation
 
+/// headers for creating thread runs
+typealias RunThreadRequest = EmptyEncodableRequest
+
 /// Type-erased struct for `Decodable`
 ///
 /// Decodes input data into various concrete types, and if successful, stores the value as
@@ -167,6 +170,3 @@ public struct AssistantFunction: DecodableResponse {
         arguments = try JSONDecoder().decode([String: FunctionArgument].self, from: data)
     }
 }
-
-/// headers for creating thread runs
-struct RunThreadRequest: EncodableRequest {}
