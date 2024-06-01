@@ -10,13 +10,7 @@ import SwiftUI
 
 struct AssistantListView: View {
     @State
-    var assistants: [Assistant] = [
-        .init(id: "asst_nIRcC8GWP5Fuw3FVDzn6A680",
-              name: "Weather",
-              description: nil,
-              model: "",
-              instructions: "")
-    ]
+    var assistants: [Assistant] = []
 
     var body: some View {
         VStack {
