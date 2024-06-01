@@ -30,7 +30,7 @@ class ListAssistantsTests: XCTestCase {
     }
 
     var testResponse: ListAssistantsResponse {
-        ListAssistantsResponse(data: [testAssistant1, testAssistant1])
+        ListAssistantsResponse(firstId: "asst_abc123", lastId: "asst_abc789", hasMore: false, data: [testAssistant1, testAssistant1])
     }
 
     private var listAssistantsReponseJSONString: String {
@@ -83,6 +83,9 @@ class ListAssistantsTests: XCTestCase {
 
     func testAssistantsResponse_canBeDecoded() throws {
         let decodedResponse = try toInstance(from: listAssistantsReponseJSONString, to: ListAssistantsResponse.self)
+        XCTAssertEqual(decodedResponse.firstId, testResponse.firstId)
+        XCTAssertEqual(decodedResponse.lastId, testResponse.lastId)
+        XCTAssertFalse(decodedResponse.hasMore)
         XCTAssertEqual(decodedResponse.data[0], testAssistant1)
         XCTAssertEqual(decodedResponse.data[1], testAssistant2)
     }

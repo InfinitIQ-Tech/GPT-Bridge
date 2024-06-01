@@ -9,6 +9,9 @@ import Foundation
 
 struct ListAssistantsRequest: EncodableRequest {}
 struct ListAssistantsResponse: DecodableResponse {
+    public let firstId: String
+    public let lastId: String
+    public let hasMore: Bool
     let data: [Assistant]
 }
 
