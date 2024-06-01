@@ -26,8 +26,27 @@ struct AssistantListView: View {
             // list assistants
             guard assistants.isEmpty else { return }
             do {
-                assistants = try await GPTBridge.listAssistants()
-                    .sorted(by: { $0.name < $1.name })
+                let response = try await GPTBridge.listAssistants(
+                    paginatedBy: PaginatedRequestParameters(
+                        limit: 10,
+                        order: .descending
+                    )
+                )
+                var hasMore = response.hasMore
+                assistants += response.data
+
+                while hasMore {
+                    let lastId = assistants.last?.id
+                    let paginationRequest = PaginatedRequestParameters(
+                        limit: 10,
+                        startAfter: lastId ?? "",
+                        order: .descending
+                    )
+                    let response = try await GPTBridge.listAssistants(paginatedBy: paginationRequest)
+                    hasMore = response.hasMore
+                    assistants += response.data
+                }
+
             } catch {
                 print("Error loading assistants: \(error)")
             }
