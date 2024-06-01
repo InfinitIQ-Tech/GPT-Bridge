@@ -8,13 +8,6 @@
 import XCTest
 @testable import GPTBridge
 
-//typealias TestableResponse = DecodableResponse & EncodableRequest & Equatable
-//
-//struct DallE3FunctionArguments: TestableResponse {
-//    let prompt: String
-//    let photoName: String
-//}
-
 final class FunctionRunHandlerTests: XCTestCase {
     let testArgs = AssistantFunction(name: "Test", arguments: ["argument1": FunctionArgument("foo"), "argument2": FunctionArgument(2)])
 
