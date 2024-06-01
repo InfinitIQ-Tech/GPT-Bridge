@@ -32,7 +32,11 @@ public struct PaginatedRequestParameters {
         sharedInit(limit: limit, order: order)
         self.startBefore = startBefore
     }
-    
+    /// fetch the initial request given a limit
+    public init(limit: Int, order: PaginationOrder = .createdAt) {
+        sharedInit(limit: limit, order: order)
+    }
+
     mutating
     private func sharedInit(limit: Int, order: PaginationOrder) {
         self.limit = limit
