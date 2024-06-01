@@ -7,10 +7,33 @@
 
 import Foundation
 
-enum PaginationOrder: String, Encodable {
-    case asc
+public enum PaginationOrder: String, Encodable {
+    case ascending = "asc"
     case createdAt = "created_at"
-    case desc
+    case descending = "desc"
+}
+
+public struct PaginatedRequestParameters {
+    private(set) var limit: Int? = nil
+    private(set) var startAfter: String? = nil
+    private(set) var startBefore: String? = nil
+    private(set) var order: PaginationOrder = .createdAt
+
+    public init(limit: Int, startAfter: String, order: PaginationOrder = .createdAt) {
+        sharedInit(limit: limit, order: order)
+        self.startAfter = startAfter
+    }
+
+    public init(limit: Int, startBefore: String, order: PaginationOrder = .createdAt) {
+        sharedInit(limit: limit, order: order)
+        self.startBefore = startBefore
+    }
+    
+    mutating
+    private func sharedInit(limit: Int, order: PaginationOrder) {
+        self.limit = limit
+        self.order = order
+    }
 }
 
 /// Use this request to list assistants and paginate

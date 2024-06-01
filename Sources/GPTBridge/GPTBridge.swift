@@ -51,11 +51,16 @@ public class GPTBridge {
 
     /// List assistants in `orgId`
     /// - NOTE: If no `orgId` is provided, your OpenAI account's default `org_id` is used
-    public static func listAssistants(orgId: String? = nil) async throws -> [Assistant] {
+    public static func listAssistants(orgId: String? = nil, paginatedBy: PaginatedRequestParameters? = nil) async throws -> [Assistant] {
         if let orgId {
             GPTSecretsConfig.setOrgId(orgId: orgId)
         }
-        let listAssistantRequest = ListAssistantsRequest()
+        let listAssistantRequest = ListAssistantsRequest(
+            after: paginatedBy?.startAfter,
+            before: paginatedBy?.startBefore,
+            limit: paginatedBy?.limit,
+            order: paginatedBy?.order
+        )
         let listAssistantsResponse: ListAssistantsResponse = try await requestManager
             .makeRequest(endpoint: .listAssistants, method: .GET, requestData: listAssistantRequest)
         return listAssistantsResponse.data
