@@ -79,11 +79,11 @@ struct ListAssistantsRequest: EncodableRequest {
     }
 }
 
-struct ListAssistantsResponse: DecodableResponse {
+public struct ListAssistantsResponse: DecodableResponse {
     public let firstId: String
     public let lastId: String
     public let hasMore: Bool
-    let data: [Assistant]
+    public let data: [Assistant]
 }
 
 public struct Assistant: Codable, Equatable {
