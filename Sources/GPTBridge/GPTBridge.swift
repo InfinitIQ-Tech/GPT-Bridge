@@ -66,7 +66,7 @@ public class GPTBridge {
                 orgId: orgId
             )
         }
-        
+
         let listAssistantRequest = ListAssistantsRequest(
             after: paginatedBy?.startAfter,
             before: paginatedBy?.startBefore,
