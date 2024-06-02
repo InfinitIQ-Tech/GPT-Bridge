@@ -76,7 +76,7 @@ public class GPTBridge {
         
         return try await requestManager
             .makeRequest(
-                endpoint: .listAssistants,
+                endpoint: .listAssistants(limit: paginatedBy?.limit, order: paginatedBy?.order, before: paginatedBy?.startBefore, after: paginatedBy?.startAfter),
                 method: .GET,
                 requestData: listAssistantRequest
             )

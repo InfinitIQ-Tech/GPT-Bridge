@@ -21,8 +21,6 @@ struct AssistantListView: View {
         }
         .padding()
         .task {
-            GPTBridge.appLaunch(openAIAPIKey: "sk-myOpenAI_API_Key", assistantKey: "my_assistant_key")
-
             // list assistants
             guard assistants.isEmpty else { return }
             do {

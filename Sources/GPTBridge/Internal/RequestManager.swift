@@ -19,7 +19,16 @@ struct RequestManager {
         method: HttpMethod,
         requestData: U?
     ) async throws -> T {
-        let endpointURL = baseURL.appendingPathComponent(endpoint.rawValue)
+        var endpointURL = baseURL.appendingPathComponent(endpoint.rawValue.endpoint)
+        
+        if let queryItems = endpoint.rawValue.queryItems,
+           !queryItems.isEmpty {
+            var components = URLComponents(url: endpointURL, resolvingAgainstBaseURL: false)
+            components?.queryItems = queryItems
+            if let url = components?.url {
+                endpointURL = url
+            }
+        }
 
         var request = URLRequest(url: endpointURL)
         request.httpMethod = method.rawValue
