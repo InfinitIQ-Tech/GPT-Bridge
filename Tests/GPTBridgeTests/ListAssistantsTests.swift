@@ -30,7 +30,12 @@ class ListAssistantsTests: XCTestCase {
     }
 
     var testResponse: ListAssistantsResponse {
-        ListAssistantsResponse(firstId: "asst_abc123", lastId: "asst_abc789", hasMore: false, data: [testAssistant1, testAssistant1])
+        ListAssistantsResponse(
+            firstId: "asst_abc123",
+            lastId: "asst_abc789",
+            hasMore: false,
+            data: [testAssistant1, testAssistant1]
+        )
     }
 
     private var listAssistantsReponseJSONString: String {
