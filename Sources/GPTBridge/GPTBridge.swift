@@ -14,7 +14,7 @@ import Foundation
 ///
 /// > Conversing with the bot
 /// > 1. Create a thread
-/// > 
+/// >
 /// > `let threadId = GPTBridge.createThread()`
 /// >
 /// > 2. Add a message to the thread
@@ -73,7 +73,7 @@ public class GPTBridge {
             limit: paginatedBy?.limit,
             order: paginatedBy?.order
         )
-        
+
         return try await requestManager
             .makeRequest(
                 endpoint: .listAssistants(limit: paginatedBy?.limit, order: paginatedBy?.order, before: paginatedBy?.startBefore, after: paginatedBy?.startAfter),
@@ -81,7 +81,7 @@ public class GPTBridge {
                 requestData: listAssistantRequest
             )
     }
-    
+
     /// Create a thread to converse with the assistant
     /// - Returns: The thread's ID
     public static func createThread() async throws -> String {
@@ -94,7 +94,7 @@ public class GPTBridge {
             )
         return response.id
     }
-    
+
     /// Add a message to a thread
     public static func addMessageToThread(
         message: String,
@@ -134,7 +134,7 @@ public class GPTBridge {
             }
         }
     }
-    
+
     /// Create a run in a thread
     /// - Parameter threadId: The threadId of the run to create
     /// - Returns: The created Run's ID
@@ -153,7 +153,7 @@ public class GPTBridge {
             )
         return runResponse.id
     }
-    
+
     /// Continuously polls the status of a specific run (identified by `runId`) in a thread (identified by `threadId`).
     ///
     /// Assumes the beginning status of the run is `.queued`. In each iteration of the loop, makes a GET request to the `runThread` endpoint, updating the status of the run.
@@ -182,10 +182,10 @@ public class GPTBridge {
             .failed,
             .requiresAction
         ]
-        
+
         var loopStatus: RunThreadResponse.Status = .queued // assume queued status to begin with. This will be overwritten on the first run anyway
         var currentRunResponse: RunThreadResponse?
-        
+
         while !completedStatuses.contains(
             loopStatus
         ) {
@@ -204,7 +204,7 @@ public class GPTBridge {
                 nanoseconds: 500_000_000
             )
         }
-        
+
         guard let currentRunResponse else {
             throw NSError(
                 domain: #function,
@@ -212,7 +212,7 @@ public class GPTBridge {
                 userInfo: [NSLocalizedDescriptionKey: "The run response is nil, though the run is complete"]
             )
         }
-        
+
         if loopStatus == .requiresAction {
             guard let requiredAction = currentRunResponse.requiredAction else {
                 throw Error.nilRunResponse
@@ -225,7 +225,7 @@ public class GPTBridge {
                   !toolCalls.isEmpty else {
                 throw Error.nilRunResponse
             }
-            
+
             let toolCallId = toolCalls[0].id
             return FunctionRunStepResult(
                 toolCallId: toolCallId,
@@ -258,7 +258,7 @@ public class GPTBridge {
             )
         }
     }
-    
+
     /// Cancel the current run manually
     /// This is useful for reducing processing time in the OpenAI API when the assistant doesn't need to know the results of a function call
     public static func cancelRun(
@@ -276,7 +276,7 @@ public class GPTBridge {
                 requestData: cancelRunRequest
             )
     }
-    
+
     /// Submits the outputs from a function call to the assistant and polls for the next step in the run, which could be another tool call or a final message.
     ///
     /// This function is used when your app requires the assistant to process the result of you processing its function call.
@@ -315,7 +315,7 @@ public class GPTBridge {
             runId: runId
         )
     }
-    
+
     static func getMessageId(
         threadId: String,
         runId: String
@@ -337,7 +337,7 @@ public class GPTBridge {
         }
         return messageId
     }
-    
+
     static func getMessageText(
         threadId: String,
         messageId: String
