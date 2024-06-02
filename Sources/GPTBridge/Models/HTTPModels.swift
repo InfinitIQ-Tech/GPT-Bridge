@@ -24,25 +24,32 @@ enum AssistantEndpoint {
     case listAssistants(limit: Int?, order: PaginationOrder?, before: String?, after: String?)
     case submitToolOutputs(threadId: String, runId: String)
 
-    var rawValue: (endpoint: String, queryItems: [URLQueryItem]?) {
+    var path: String {
         switch self {
         case .threads:
-            return ("/threads", nil)
+            "/threads"
         case .addMessage(let threadId):
-            return (messageEndpoint(threadId: threadId), nil)
+            messageEndpoint(threadId: threadId)
         case .createRun(let threadId):
-            return (threadEndpoint(threadId: threadId) + "/runs", nil)
+            threadEndpoint(threadId: threadId) + "/runs"
         case .runThread(let threadId, let runId):
-            return (runEndpoint(threadId: threadId, runId: runId), nil)
+            runEndpoint(threadId: threadId, runId: runId)
         case .getMessageId(let threadId, let runId):
-            return (runEndpoint(threadId: threadId, runId: runId) + "/steps", nil)
+            runEndpoint(threadId: threadId, runId: runId) + "/steps"
         case .getMessageText(let threadId, let messageId):
-            return (messageEndpoint(threadId: threadId) + "/\(messageId)", nil)
+            messageEndpoint(threadId: threadId) + "/\(messageId)"
         case .cancelRun(let threadId, let runId):
-            return (runEndpoint(threadId: threadId, runId: runId) + "/cancel", nil)
-        case .listAssistants(let limit, let order, let before, let after):
-            let endpoint = "/assistants"
+            runEndpoint(threadId: threadId, runId: runId) + "/cancel"
+        case .listAssistants:
+            "/assistants"
+        case .submitToolOutputs(let threadId, let runId):
+            runEndpoint(threadId: threadId, runId: runId) + "/submit_tool_outputs"
+        }
+    }
 
+    var queryItems: [URLQueryItem]? {
+        switch self {
+        case .listAssistants(let limit, let order, let before, let after):
             var queryItems: [URLQueryItem] = []
             if let order = order {
                 queryItems.append(URLQueryItem(name: "order", value: order.rawValue))
@@ -56,15 +63,14 @@ enum AssistantEndpoint {
             if let after = after {
                 queryItems.append(URLQueryItem(name: "after", value: after))
             }
-            
-            return (endpoint, queryItems)
-        case .submitToolOutputs(let threadId, let runId):
-            return (runEndpoint(threadId: threadId, runId: runId) + "/submit_tool_outputs", nil)
+            return queryItems
+        default:
+            return nil
         }
     }
 
     private func threadEndpoint(threadId: String) -> String {
-        Self.threads.rawValue.endpoint + "/\(threadId)"
+        Self.threads.path + "/\(threadId)"
     }
 
     private func messageEndpoint(threadId: String) -> String {

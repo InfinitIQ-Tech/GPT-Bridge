@@ -19,9 +19,9 @@ struct RequestManager {
         method: HttpMethod,
         requestData: U?
     ) async throws -> T {
-        var endpointURL = baseURL.appendingPathComponent(endpoint.rawValue.endpoint)
+        var endpointURL = baseURL.appendingPathComponent(endpoint.path)
         
-        if let queryItems = endpoint.rawValue.queryItems,
+        if let queryItems = endpoint.queryItems,
            !queryItems.isEmpty {
             var components = URLComponents(url: endpointURL, resolvingAgainstBaseURL: false)
             components?.queryItems = queryItems
@@ -76,7 +76,7 @@ struct RequestManager {
                         throw RequestError.invalidResponse(400)
                     }
                 } else {
-                    print("endpoint: \(endpoint.rawValue), status code: \(httpResponse.statusCode)")
+                    print("endpoint: \(endpoint.path), status code: \(httpResponse.statusCode)")
                     print(String(data: data, encoding: .utf8) ?? "No Response Data")
                     throw RequestError.invalidResponse(httpResponse.statusCode)
                 }
