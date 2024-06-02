@@ -63,7 +63,7 @@ public struct PaginatedRequestParameters {
 /// # Usage Example
 /// ```swift
 /// let request = ListAssistantsRequest(limit: 1)
-/// // TODO: get the response
+/// // get the response here <placeholder>
 /// if response.hasMore {
 ///     let lastId = response.lastId
 ///     // make the next paginated request
