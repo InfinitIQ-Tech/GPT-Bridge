@@ -7,20 +7,17 @@
 
 import Foundation
 
-struct RequestManager {
-    private let baseURL: URL
+protocol RequestManageable {
+    var baseURL: URL { get }
+    func makeURL(fromEndpoint endpoint: AssistantEndpoint) -> URL
+}
 
-    init(baseURL: URL = URL(string: "https://api.openai.com/v1")!) {
-        self.baseURL = baseURL
-    }
+extension RequestManageable {
+    static var baseURLString: String { "https://api.openai.com/v1" }
 
-    func makeRequest<T: DecodableResponse, U: EncodableRequest>(
-        endpoint: AssistantEndpoint,
-        method: HttpMethod,
-        requestData: U?
-    ) async throws -> T {
+    func makeURL(fromEndpoint endpoint: AssistantEndpoint) -> URL {
         var endpointURL = baseURL.appendingPathComponent(endpoint.path)
-        
+
         if let queryItems = endpoint.queryItems,
            !queryItems.isEmpty {
             var components = URLComponents(url: endpointURL, resolvingAgainstBaseURL: false)
@@ -29,6 +26,24 @@ struct RequestManager {
                 endpointURL = url
             }
         }
+
+        return endpointURL
+    }
+}
+
+struct RequestManager: RequestManageable {
+    let baseURL: URL
+
+    init(baseURL: URL = URL(string: Self.baseURLString)!) {
+        self.baseURL = baseURL
+    }
+
+    func makeRequest<T: DecodableResponse, U: EncodableRequest>(
+        endpoint: AssistantEndpoint,
+        method: HttpMethod,
+        requestData: U?
+    ) async throws -> T {
+        let endpointURL = makeURL(fromEndpoint: endpoint)
 
         var request = URLRequest(url: endpointURL)
         request.httpMethod = method.rawValue

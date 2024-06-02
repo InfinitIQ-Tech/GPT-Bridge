@@ -81,6 +81,28 @@ class ListAssistantsTests: XCTestCase {
         """
     }
 
+    func testPaginatedRequest_makesPaginatedURL() throws {
+        let limit = 10
+        let endpoint = AssistantEndpoint.listAssistants(limit: limit, order: .descending, before: nil, after: nil)
+        let spy = RequestManagerSpy(mockRequest: nil)
+        let testURL = spy.makeURL(fromEndpoint: endpoint)
+
+        let components = URLComponents(url: testURL, resolvingAgainstBaseURL: false)
+        let queryItems = try XCTUnwrap(components?.queryItems)
+
+        let limitQueryItem = queryItems.filter { $0.name == "limit" }.first
+        let orderQueryItem = queryItems.filter { $0.name == "order" }.first
+        let beforeQueryItem = queryItems.filter { $0.name == "before" }.first
+        let afterQueryItem = queryItems.filter { $0.name == "after" }.first
+
+        XCTAssertEqual(limitQueryItem?.value, String(10))
+        XCTAssertEqual(orderQueryItem?.value, "desc")
+        XCTAssertNil(beforeQueryItem)
+        XCTAssertNil(afterQueryItem)
+
+        XCTAssertEqual(components?.url?.absoluteString, "https://api.openai.com/v1/assistants?order=desc&limit=10")
+    }
+
     func testAssistants_areDecodable() throws {
         let decodedAssistant = try toInstance(from: assistantJSONString, to: Assistant.self)
         XCTAssertEqual(decodedAssistant, testAssistant1)
