@@ -21,10 +21,10 @@ enum AssistantEndpoint {
     case getMessageId(threadId: String, runId: String)
     case getMessageText(threadId: String, messageId: String)
     case cancelRun(threadId: String, runId: String)
-    case listAssistants
+    case listAssistants(limit: Int?, order: PaginationOrder?, before: String?, after: String?)
     case submitToolOutputs(threadId: String, runId: String)
 
-    var rawValue: String {
+    var path: String {
         switch self {
         case .threads:
             "/threads"
@@ -47,8 +47,30 @@ enum AssistantEndpoint {
         }
     }
 
+    var queryItems: [URLQueryItem]? {
+        switch self {
+        case .listAssistants(let limit, let order, let before, let after):
+            var queryItems: [URLQueryItem] = []
+            if let order = order {
+                queryItems.append(URLQueryItem(name: "order", value: order.rawValue))
+            }
+            if let limit = limit {
+                queryItems.append(URLQueryItem(name: "limit", value: String(limit)))
+            }
+            if let before = before {
+                queryItems.append(URLQueryItem(name: "before", value: before))
+            }
+            if let after = after {
+                queryItems.append(URLQueryItem(name: "after", value: after))
+            }
+            return queryItems
+        default:
+            return nil
+        }
+    }
+
     private func threadEndpoint(threadId: String) -> String {
-        Self.threads.rawValue + "/\(threadId)"
+        Self.threads.path + "/\(threadId)"
     }
 
     private func messageEndpoint(threadId: String) -> String {
@@ -143,3 +165,6 @@ extension EncodableRequest {
         return try encoder.encode(self)
     }
 }
+
+struct EmptyDecodableResponse: DecodableResponse {}
+struct EmptyEncodableRequest: EncodableRequest {}
