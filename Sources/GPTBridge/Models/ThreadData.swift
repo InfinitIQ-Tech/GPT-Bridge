@@ -10,6 +10,7 @@ import Foundation
 /// JSON payload including the thread's ID
 struct CreateThreadResponse: DecodableResponse {
     let id: String
+    let createdAt: Date
 }
 
 /// headers for creating threads
