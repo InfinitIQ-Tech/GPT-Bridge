@@ -120,6 +120,7 @@ extension DecodableResponse {
     static func createInstanceFrom(data: Data) throws -> Self {
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
+        decoder.dateDecodingStrategy = .secondsSince1970
         return try decoder.decode(Self.self, from: data)
     }
 }
