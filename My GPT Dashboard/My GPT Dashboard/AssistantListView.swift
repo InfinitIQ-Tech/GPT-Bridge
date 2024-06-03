@@ -10,13 +10,7 @@ import SwiftUI
 
 struct AssistantListView: View {
     @State
-    var assistants: [Assistant] = [
-        .init(id: "asst_nIRcC8GWP5Fuw3FVDzn6A680",
-              name: "Weather",
-              description: nil,
-              model: "",
-              instructions: "")
-    ]
+    var assistants: [Assistant] = []
 
     var body: some View {
         VStack {
@@ -27,13 +21,30 @@ struct AssistantListView: View {
         }
         .padding()
         .task {
-            GPTBridge.appLaunch(openAIAPIKey: "sk-myOpenAI_API_Key", assistantKey: "my_assistant_key")
-
             // list assistants
             guard assistants.isEmpty else { return }
             do {
-                assistants = try await GPTBridge.listAssistants()
-                    .sorted(by: { $0.name < $1.name })
+                let response = try await GPTBridge.listAssistants(
+                    paginatedBy: PaginatedRequestParameters(
+                        limit: 10,
+                        order: .descending
+                    )
+                )
+                var hasMore = response.hasMore
+                assistants += response.data
+
+                while hasMore {
+                    let lastId = assistants.last?.id
+                    let paginationRequest = PaginatedRequestParameters(
+                        limit: 10,
+                        startAfter: lastId ?? "",
+                        order: .descending
+                    )
+                    let response = try await GPTBridge.listAssistants(paginatedBy: paginationRequest)
+                    hasMore = response.hasMore
+                    assistants += response.data
+                }
+
             } catch {
                 print("Error loading assistants: \(error)")
             }

@@ -7,6 +7,11 @@
 
 import Foundation
 
+typealias CancelRunRequest = EmptyEncodableRequest
+typealias CancelRunResponse = EmptyDecodableResponse
+typealias MessageIdRequest = EmptyEncodableRequest
+typealias MessageTextRequest = EmptyEncodableRequest
+
 struct MessageContent: DecodableResponse {
     let content: [MessageTextObject]
 }
@@ -41,9 +46,3 @@ struct AddMessageToThreadResponse: DecodableResponse {
     let id: String
     let content: [MessageTextObject]
 }
-
-struct CancelRunRequest: EncodableRequest {}
-struct CancelRunResponse: DecodableResponse {}
-struct MessageIdRequest: EncodableRequest {}
-struct MessageTextRequest: EncodableRequest {}
-
