@@ -90,8 +90,7 @@ class DallEHandler: EncodableRequest {
             throw Error.badResponse
         }
 
-        let jsonDecoder = JSONDecoder()
-        jsonDecoder.keyDecodingStrategy = .convertFromSnakeCase
+        let jsonDecoder = EmptyDecodableResponse.jsonDecoder
 
         let dataArray = try jsonDecoder.decode(DallEResponse.self, from: data).data
         guard dataArray.count > 0 else { throw Error.noUrl }

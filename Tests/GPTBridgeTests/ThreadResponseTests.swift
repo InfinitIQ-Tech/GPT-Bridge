@@ -10,7 +10,7 @@ import XCTest
 
 class ThreadResponseTests: XCTestCase {
     private var testThreadResponse: CreateThreadResponse {
-        CreateThreadResponse(id: "thread_abc123")
+        CreateThreadResponse(id: "thread_abc123", createdAt: Date(timeIntervalSince1970: 1699012949))
     }
 
     private var testThreadResponseJSONString: String {

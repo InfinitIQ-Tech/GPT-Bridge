@@ -139,10 +139,15 @@ protocol DecodableResponse: Decodable {
 }
 
 extension DecodableResponse {
-    static func createInstanceFrom(data: Data) throws -> Self {
+    static var jsonDecoder: JSONDecoder {
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
         decoder.dateDecodingStrategy = .secondsSince1970
+        return decoder
+    }
+    
+    static func createInstanceFrom(data: Data) throws -> Self {
+        let decoder = jsonDecoder
         return try decoder.decode(Self.self, from: data)
     }
 }
