@@ -15,7 +15,7 @@ struct AssistantListView: View {
     var body: some View {
         VStack {
             List(assistants, id: \.id) { assistant in
-                Text(assistant.name)
+                Text(assistant.name ?? "Name Not Defined")
             }
             .listStyle(SidebarListStyle())
         }
@@ -30,19 +30,20 @@ struct AssistantListView: View {
                         order: .descending
                     )
                 )
-                var hasMore = response.hasMore
-                assistants += response.data
-
-                while hasMore {
-                    let lastId = assistants.last?.id
-                    let paginationRequest = PaginatedRequestParameters(
-                        limit: 10,
-                        startAfter: lastId ?? "",
-                        order: .descending
-                    )
-                    let response = try await GPTBridge.listAssistants(paginatedBy: paginationRequest)
-                    hasMore = response.hasMore
+                if var hasMore = response.hasMore {
                     assistants += response.data
+
+                    while hasMore {
+                        let lastId = assistants.last?.id
+                        let paginationRequest = PaginatedRequestParameters(
+                            limit: 10,
+                            startAfter: lastId ?? "",
+                            order: .descending
+                        )
+                        let response = try await GPTBridge.listAssistants(paginatedBy: paginationRequest)
+                        hasMore = response.hasMore ?? false
+                        assistants += response.data
+                    }
                 }
 
             } catch {
