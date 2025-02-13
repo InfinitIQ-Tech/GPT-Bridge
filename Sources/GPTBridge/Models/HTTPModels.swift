@@ -106,7 +106,7 @@ struct OpenAIHeaders {
 
     private static var openAIBetaHeaders: HeaderGroup {
         HeaderGroup(headers: [
-            "OpenAI-Beta": "assistants=v1"
+            "OpenAI-Beta": "assistants=v2"
         ])
     }
 
@@ -168,3 +168,6 @@ extension EncodableRequest {
 
 struct EmptyDecodableResponse: DecodableResponse {}
 struct EmptyEncodableRequest: EncodableRequest {}
+struct EmptyStreamingEncodableRequest: EncodableRequest {
+    let stream: Bool
+}
