@@ -95,7 +95,7 @@ public struct FunctionArgument: Codable {
 
 /// Headers and JSON body for creating thread runs
 struct CreateThreadRunRequest: EncodableRequest {
-    var assistantId: String = GPTSecretsConfig.assistantKey
+    var assistantId: String
 }
 
 /// JSON body for AI function/tool usage
