@@ -43,7 +43,7 @@ class AssistantChatViewModel: ObservableObject {
         let chatMessage = ChatMessage(content: text, role: .user)
         self.messages.append(chatMessage)
 
-        let runId = try await GPTBridge.createRun(threadId: threadId)
+        let runId = try await GPTBridge.createRun(threadId: threadId, assistantId: activeAssistant.id)
 
         let result = try await GPTBridge.pollRunStatus(threadId: threadId, runId: runId)
         guard let text = result.message else { throw Error.noMessageFromRun }
