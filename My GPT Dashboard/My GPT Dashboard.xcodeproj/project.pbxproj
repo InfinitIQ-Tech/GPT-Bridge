@@ -12,6 +12,7 @@
 		AA770DA32BC113BE00D7FAE6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA770DA22BC113BE00D7FAE6 /* Assets.xcassets */; };
 		AA770DA72BC113BE00D7FAE6 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA770DA62BC113BE00D7FAE6 /* Preview Assets.xcassets */; };
 		AA770DB02BC1149500D7FAE6 /* GPTBridge in Frameworks */ = {isa = PBXBuildFile; productRef = AA770DAF2BC1149500D7FAE6 /* GPTBridge */; };
+		AABC12C02D5F084E00C74472 /* AssistantChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABC12BF2D5F084E00C74472 /* AssistantChatView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -21,7 +22,8 @@
 		AA770DA22BC113BE00D7FAE6 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		AA770DA42BC113BE00D7FAE6 /* My_GPT_Dashboard.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = My_GPT_Dashboard.entitlements; sourceTree = "<group>"; };
 		AA770DA62BC113BE00D7FAE6 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
-		AA770DAD2BC113F600D7FAE6 /* GPTBridge */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = GPTBridge; path = /Users/kennethdubroff/Development/Xcode_Development/Projects/GPTBridge; sourceTree = "<absolute>"; };
+		AA770DAD2BC113F600D7FAE6 /* GPTBridge */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = GPTBridge; path = /Users/kennethdubroff/Development/Xcode_Development/InfinitIQTech/GPTBridge; sourceTree = "<absolute>"; };
+		AABC12BF2D5F084E00C74472 /* AssistantChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssistantChatView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,6 +60,7 @@
 			children = (
 				AA770DAD2BC113F600D7FAE6 /* GPTBridge */,
 				AA770D9E2BC113BD00D7FAE6 /* My_GPT_DashboardApp.swift */,
+				AABC12BF2D5F084E00C74472 /* AssistantChatView.swift */,
 				AA770DA02BC113BD00D7FAE6 /* AssistantListView.swift */,
 				AA770DA22BC113BE00D7FAE6 /* Assets.xcassets */,
 				AA770DA42BC113BE00D7FAE6 /* My_GPT_Dashboard.entitlements */,
@@ -156,6 +159,7 @@
 			files = (
 				AA770DA12BC113BD00D7FAE6 /* AssistantListView.swift in Sources */,
 				AA770D9F2BC113BD00D7FAE6 /* My_GPT_DashboardApp.swift in Sources */,
+				AABC12C02D5F084E00C74472 /* AssistantChatView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
