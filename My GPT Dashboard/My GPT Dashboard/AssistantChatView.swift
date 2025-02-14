@@ -32,7 +32,8 @@ class AssistantChatViewModel: ObservableObject {
         let thread = try await GPTBridge.createThread()
         self.threadId = thread
     }
-
+    
+    @MainActor
     func addMessageToThread(withContent text: String) async throws {
         if self.threadId == nil {
             try await createThread()
@@ -100,7 +101,7 @@ struct AssistantChatView: View {
             }
             .padding()
         }
-        .navigationTitle(viewModel.activeAssistant.id)
+        .navigationTitle(viewModel.activeAssistant.name ?? "Chat with assistant")
     }
 }
 
