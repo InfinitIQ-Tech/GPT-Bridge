@@ -20,23 +20,10 @@ struct GPTSecretsConfig {
         }
     }
 
-    private static var _assistantKey: String?
-
-    static var assistantKey: String {
-        get {
-            assert(_assistantKey != nil && !_assistantKey!.isEmpty, "Assistant Key must not be empty. Run `GPTBridge.applaunch` during your app's entry point")
-            return _assistantKey ?? ""
-        }
-        set(newAssistantKey) {
-            _assistantKey = newAssistantKey
-        }
-    }
-
     static var orgId: String?
 
-    static func appLaunch(openAIAPIKey: String, assistantKey: String) {
+    static func appLaunch(openAIAPIKey: String) {
         self.openAIAPIKey = openAIAPIKey
-        self.assistantKey = assistantKey
     }
 
     static func setOrgId(orgId: String) {

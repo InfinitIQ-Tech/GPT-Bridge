@@ -13,13 +13,15 @@ struct My_GPT_DashboardApp: App {
     var body: some Scene {
         WindowGroup {
             TabView {
-                AssistantListView()
-                    .tabItem {
-                        Label("Assistants", systemImage: "person.2.badge.gearshape.fill")
-                    }
-                    .task {
-                        GPTBridge.appLaunch(openAIAPIKey: "", assistantKey: "my_assistant_key")
-                    }
+                NavigationStack {
+                    AssistantListView()
+                        .tabItem {
+                            Label("Assistants", systemImage: "person.2.badge.gearshape.fill")
+                        }
+                        .task {
+                            GPTBridge.appLaunch(openAIAPIKey: "my_api_key")
+                        }
+                }
             }
         }
     }

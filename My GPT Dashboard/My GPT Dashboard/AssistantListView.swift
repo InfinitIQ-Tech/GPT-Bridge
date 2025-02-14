@@ -15,7 +15,9 @@ struct AssistantListView: View {
     var body: some View {
         VStack {
             List(assistants, id: \.id) { assistant in
-                Text(assistant.name ?? "Name Not Defined")
+                NavigationLink(destination: AssistantChatView(viewModel: AssistantChatViewModel(activeAssistant: assistant))) {
+                    Text(assistant.name ?? "Name Not Defined")
+                }
             }
             .listStyle(SidebarListStyle())
         }
