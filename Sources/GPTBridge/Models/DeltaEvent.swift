@@ -1,3 +1,11 @@
+//
+//  DeltaEvent.swift
+//  GPTBridge
+//
+//  Created by Kenneth Dubroff on 2/10/25.
+//
+
+
 import Foundation
 
 public struct DeltaEvent: Codable {

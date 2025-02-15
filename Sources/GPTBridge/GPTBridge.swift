@@ -44,6 +44,7 @@ public class GPTBridge {
     }
 
     private static let requestManager = RequestManager()
+    private static let streamingRequestManager = StreamingRequestManager()
 
     public static func appLaunch(
         openAIAPIKey: String
@@ -263,6 +264,23 @@ public class GPTBridge {
             )
         }
     }
+
+    public static func pollRunStatusStream(
+        threadId: String,
+        runId: String,
+        _ deltaEvent: @escaping (DeltaEvent) -> Void
+    ) async throws -> AsyncThrowingStream<Any, Swift.Error> {
+        // 1) Construct the SSE request (likely POST to the run’s endpoint) with `stream: true`.
+        // 2) Call `StreamingRequestManager.shared.makeStreamingRequest(...)`.
+        // 3) Return the resulting AsyncThrowingStream<String, Error>.
+        return try await streamingRequestManager.makeRequest(
+            endpoint: .runThread(threadId: threadId, runId: runId), // TODO: Create and Run thread, stream: true
+            method: .POST,
+            requestData: EmptyStreamingEncodableRequest(stream: true),
+            deltaEvent
+        )
+    }
+
 
     /// Cancel the current run manually
     /// This is useful for reducing processing time in the OpenAI API when the assistant doesn't need to know the results of a function call
