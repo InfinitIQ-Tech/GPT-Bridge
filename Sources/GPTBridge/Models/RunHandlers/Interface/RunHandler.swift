@@ -31,11 +31,11 @@ public struct FunctionRunStepResult: RunStepResult {
     }
 }
 
-struct MessageRunStepResult: RunStepResult {
-    var functions: [AssistantFunction]? = nil
-    var message: String?
+public struct MessageRunStepResult: RunStepResult {
+    public var functions: [AssistantFunction]? = nil
+    public var message: String?
 
-    init(message: String) {
+    public init(message: String) {
         self.message = message
     }
 }
