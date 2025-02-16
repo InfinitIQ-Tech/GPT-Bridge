@@ -265,20 +265,16 @@ public class GPTBridge {
         }
     }
 
-    public static func pollRunStatusStream(
-        threadId: String,
-        runId: String,
-        _ deltaEvent: @escaping (DeltaEvent) -> Void
-    ) async throws -> AsyncThrowingStream<Any, Swift.Error> {
-        // 1) Construct the SSE request (likely POST to the run’s endpoint) with `stream: true`.
-        // 2) Call `StreamingRequestManager.shared.makeStreamingRequest(...)`.
-        // 3) Return the resulting AsyncThrowingStream<String, Error>.
-        return try await streamingRequestManager.makeRequest(
-            endpoint: .runThread(threadId: threadId, runId: runId), // TODO: Create and Run thread, stream: true
-            method: .POST,
-            requestData: EmptyStreamingEncodableRequest(stream: true),
-            deltaEvent
-        )
+    public static func createAndStreamThreadRun(assistantId: String, thread: Thread) async throws -> AsyncThrowingStream<DeltaEvent, Swift.Error> {
+        let request = CreateAndRunThreadRequest(thread: thread, assistantId: assistantId)
+        return try await streamingRequestManager.makeRequest(endpoint: .runs, method: .POST, requestData: request)
+    }
+
+    public static func addMessageAndStreamThreadRun(text: String, threadId: String, assistandId: String) async throws -> AsyncThrowingStream<RunStatusEvent, Swift.Error> {
+        try await addMessageToThread(message: text, threadId: threadId)
+        let runId = try await createRun(threadId: threadId, assistantId: assistandId)
+
+        return try await streamingRequestManager.pollRunStatusStream(threadId: threadId, runId: runId, endpoint: .createRun(threadId: threadId))
     }
 
 
