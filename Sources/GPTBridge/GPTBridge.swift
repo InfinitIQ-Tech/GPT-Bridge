@@ -148,7 +148,7 @@ public class GPTBridge {
         threadId: String
     ) async throws -> String {
         // MARK: Create the run
-        let runRequestData: CreateThreadRunRequest = CreateThreadRunRequest()
+        let runRequestData: CreateThreadRunRequest = CreateThreadRunRequest(assistantId: assistantId)
         let runResponse: RunThreadResponse = try await requestManager
             .makeRequest(
                 endpoint: .createRun(

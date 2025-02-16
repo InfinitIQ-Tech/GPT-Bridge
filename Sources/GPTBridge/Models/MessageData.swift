@@ -21,3 +21,13 @@ struct AddMessageToThreadRequest: EncodableRequest, OpenAIMessageable {
         self.content = content
     }
 }
+
+public struct ChatMessage: OpenAIMessageable {
+    public var content: String
+    public var role: Role
+
+    public init(content: String, role: Role = .user) {
+        self.content = content
+        self.role = role
+    }
+}
