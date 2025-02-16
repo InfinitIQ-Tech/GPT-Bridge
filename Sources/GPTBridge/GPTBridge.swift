@@ -264,12 +264,61 @@ public class GPTBridge {
             )
         }
     }
-
+    
+    /// Create a new thread and stream the first run
+    /// - Parameters:
+    ///   - assistantId: The assistant ID of the assistant who will be running the thread
+    ///   - thread: A `Thread` containing an array of `ChatMessage`
+    /// - Returns: An Async Throwing Stream of `DeltaEvent`, `Error`
+    /// - Usage Example:
+    /// ```swift
+    ///let result = try await GPTBridge.createAndStreamThreadRun(assistantId: activeAssistant.id, thread: thread)
+    ///// handle the async stream
+    ///for try await event in result {
+    ///  // ** only handle message deltas **
+    ///  event.delta.content.forEach { [weak self] delta in
+    ///  guard let self else { return }
+    ///  DispatchQueue.main.async {
+    ///    self.streamingText += delta.text.value
+    ///  }
+    ///}
+    /// ```
     public static func createAndStreamThreadRun(assistantId: String, thread: Thread) async throws -> AsyncThrowingStream<DeltaEvent, Swift.Error> {
         let request = CreateAndRunThreadRequest(thread: thread, assistantId: assistantId)
         return try await streamingRequestManager.makeRequest(endpoint: .runs, method: .POST, requestData: request)
     }
 
+    /// Add a message to an existing thread, create a new run, and stream it
+    /// - Parameters:
+    ///   - text: The content of the message to add to the thread
+    ///   - threadId: The existing thread's id
+    ///   - assistandId: The id of the assistant who will run the thread
+    /// - Returns: An Async Throwing Stream emitting `RunStatusEvent` objects
+    /// - Usage Example:
+    /// ```swift
+    /// let stream = try await GPTBridge.addMessageAndStreamThreadRun(text: text, threadId: threadId, assistandId: assistantId)
+    /// for try await event in stream {
+    ///   switch event {
+    ///     case .messageDelta(let runStepResult):
+    ///       if let partialMessage = runStepResult.message {
+    ///         self.streamingText += partialMessage
+    ///     }
+    ///     case .messageCompleted(let message):
+    ///       self.messages.append(message)
+    ///     case .done, .runFailed:
+    ///       self.streamingText = ""
+    ///     case .errorOccurred(let error):
+    ///       let message = ChatMessage(content: "Unknown Error. Please try again", role: .assistant)
+    ///       self.messages.append(message)
+    ///       print("An Error occured while handling SSE events: \(error)")
+    ///       // stop streaming to UI
+    ///       self.resetStream(usingChatMessage: message)
+    ///       return
+    ///       // TODO: decide to exit stream or continue until it ends (error may be recoverable, but this may result in undesired behavior such as missed bytes/text resulting in a garbled stream)
+    ///     default:
+    ///       break
+    ///   }
+    /// ```
     public static func addMessageAndStreamThreadRun(text: String, threadId: String, assistandId: String) async throws -> AsyncThrowingStream<RunStatusEvent, Swift.Error> {
         try await addMessageToThread(message: text, threadId: threadId)
         let runId = try await createRun(threadId: threadId, assistantId: assistandId)
