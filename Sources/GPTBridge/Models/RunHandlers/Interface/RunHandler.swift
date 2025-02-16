@@ -14,7 +14,7 @@ protocol RunHandler {
     func handle() async throws
 }
 
-public protocol RunStepResult {
+public protocol RunStepResult: Decodable {
     var functions: [AssistantFunction]? { get }
     var message: String? { get }
 }
@@ -22,19 +22,20 @@ public protocol RunStepResult {
 public struct FunctionRunStepResult: RunStepResult {
     public let toolCallId: String
     public let functions: [AssistantFunction]?
-    public let message: String? = nil
+    public let message: String?
 
-    init(toolCallId: String, functions: [AssistantFunction]) {
+    init(toolCallId: String, functions: [AssistantFunction], message: String? = nil) {
         self.toolCallId = toolCallId
         self.functions = functions
+        self.message = message
     }
 }
 
-struct MessageRunStepResult: RunStepResult {
-    var functions: [AssistantFunction]? = nil
-    var message: String?
+public struct MessageRunStepResult: RunStepResult {
+    public var functions: [AssistantFunction]? = nil
+    public var message: String?
 
-    init(message: String) {
+    public init(message: String) {
         self.message = message
     }
 }

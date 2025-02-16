@@ -10,7 +10,14 @@ import Foundation
 /// headers for creating threads
 typealias CreateThreadRequest = EmptyEncodableRequest
 
+struct CreateAndRunThreadRequest: EncodableRequest {
+    let stream: Bool = true
+    let thread: Thread
+    let assistantId: String
+}
+
 /// JSON payload including the thread's ID
 struct CreateThreadResponse: DecodableResponse {
     let id: String
 }
+

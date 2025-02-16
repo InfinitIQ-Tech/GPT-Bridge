@@ -7,7 +7,7 @@
 
 import Foundation
 /// The role of the message sender
-public enum Role: String, EncodableRequest {
+public enum Role: String, EncodableRequest, Decodable {
     case user
     case assistant
 }
@@ -22,7 +22,19 @@ struct AddMessageToThreadRequest: EncodableRequest, OpenAIMessageable {
     }
 }
 
-public struct ChatMessage: OpenAIMessageable {
+public struct ChatThread {
+    public let thread: Thread
+}
+
+public struct Thread: Codable {
+    public var messages: [ChatMessage] = []
+
+    public init(messages: [ChatMessage]) {
+        self.messages = messages
+    }
+}
+
+public struct ChatMessage: Codable, OpenAIMessageable {
     public var content: String
     public var role: Role
 
@@ -31,3 +43,4 @@ public struct ChatMessage: OpenAIMessageable {
         self.role = role
     }
 }
+

@@ -44,14 +44,13 @@ public class GPTBridge {
     }
 
     private static let requestManager = RequestManager()
+    private static let streamingRequestManager = StreamingRequestManager()
 
     public static func appLaunch(
-        openAIAPIKey: String,
-        assistantKey: String
+        openAIAPIKey: String
     ) {
         GPTSecretsConfig.appLaunch(
-            openAIAPIKey: openAIAPIKey,
-            assistantKey: assistantKey
+            openAIAPIKey: openAIAPIKey
         )
     }
 
@@ -145,7 +144,8 @@ public class GPTBridge {
     /// - Parameter threadId: The threadId of the run to create
     /// - Returns: The created Run's ID
     public static func createRun(
-        threadId: String
+        threadId: String,
+        assistantId: String
     ) async throws -> String {
         // MARK: Create the run
         let runRequestData: CreateThreadRunRequest = CreateThreadRunRequest(assistantId: assistantId)
@@ -264,6 +264,19 @@ public class GPTBridge {
             )
         }
     }
+
+    public static func createAndStreamThreadRun(assistantId: String, thread: Thread) async throws -> AsyncThrowingStream<DeltaEvent, Swift.Error> {
+        let request = CreateAndRunThreadRequest(thread: thread, assistantId: assistantId)
+        return try await streamingRequestManager.makeRequest(endpoint: .runs, method: .POST, requestData: request)
+    }
+
+    public static func addMessageAndStreamThreadRun(text: String, threadId: String, assistandId: String) async throws -> AsyncThrowingStream<RunStatusEvent, Swift.Error> {
+        try await addMessageToThread(message: text, threadId: threadId)
+        let runId = try await createRun(threadId: threadId, assistantId: assistandId)
+
+        return try await streamingRequestManager.pollRunStatusStream(threadId: threadId, runId: runId, endpoint: .createRun(threadId: threadId))
+    }
+
 
     /// Cancel the current run manually
     /// This is useful for reducing processing time in the OpenAI API when the assistant doesn't need to know the results of a function call

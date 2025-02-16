@@ -22,20 +22,23 @@ Add the Swift Package via Swift Package Manager:
 
 <details>
   <summary>Setup</summary>
-  Before use of GPTBridge, ensure you've provided your OpenAI API key and the key for the assistant you'll be using:  
-   
-  `NOTE`: It's recommended to do this at app launch to avoid any potential timing issues.
+  1. Before use of GPTBridge, ensure you've provided your OpenAI API key:  
+  
+  `NOTE`: It's recommended to do this at app launch to avoid any potential timing issues.  
   
   ```swift
-  GPTBridge.appLaunch(openAIAPIKey: "sk-mykey", assistantKey: "my-assistant-key")
-  ```
+  GPTBridge.appLaunch(openAIAPIKey: "sk-mykey")
+  ```  
+  
+  2. GPTBridge interacts with the OpenAI assistants API. As such, it is required to create an assistant at [https://platform.openai.com/playground/assistants](https://platform.openai.com/playground/assistants)
+     - GPTBridge receives generated function arguments as well as messages from assistants  
 </details>
 
 <details>
   <summary>Usage</summary>
 1. Create a thread
   
-  A thread holds messages from the user to the assistant and from the assistant to the user.
+  A thread holds messages from the user to the assistant(s) and from the assistant(s) to the user.
 
   ```swift
   let threadId = try await GPTBridge.createThread()
@@ -52,10 +55,9 @@ Add the Swift Package via Swift Package Manager:
   A run is where an assistant determines what tools to run and runs them. If no tools are run, the assistant generates a message
 
   ```swift
-  let runId = try await GPTBridge.createRun(threadId: threadId)
+  let runId = try await GPTBridge.createRun(threadId: threadId, assistantId: "my_assistant_id")
   ```
-
-  - NOTE: only 1 run can be active in a thread at once. If a run is active and another is created, the previous run will be cancelled.
+  - NOTE: only 1 run can be active in a thread at once. If a run is active and another is created, the previous run will be cancelled.    
 
 4. Poll for run status - wait for the assistant to use tools and/or come back with a response
 
@@ -97,4 +99,6 @@ if let actionResults = runStepResult.functions {
     print("Assistant says: \(textMessage)")
 }
   ```
+6. (Optional) Chain more assistants  
+   Your app can chain multiple assistants in a single thread. This is a very powerful way to handle a single query multiple ways or to potentially create round-robin interactions with a single user and multiple assistants with different instructions. Simply repeat steps 3-5 above using the same `threadId` with a different `assistantId`
 </details>
