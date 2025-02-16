@@ -54,18 +54,33 @@ public class GPTBridge {
         )
     }
 
-    /// List assistants in `orgId`
-    /// - NOTE: If no `orgId` is provided, your OpenAI account's default `org_id` is used
-    /// - NOTE: Leave `PaginatedRequestParameters` as nil to get all assistants immediately
-    /// # Usage Example
+    /// List assistants in orgId
+    /// - NOTE: If no orgId is provided, your OpenAI account's default org_id is used
+    /// - NOTE: Leave PaginatedRequestParameters as nil to get all assistants immediately
+    ///
+    /// # Paginated Usage Example
     /// ```swift
-    /// let request = ListAssistantsRequest(limit: 1)
-    /// // get the response here <placeholder>
-    /// if response.hasMore {
-    ///     let lastId = response.lastId
-    ///     // make the next paginated request
-    ///     let request = ListAssistantsRequest(after: lastId, limit: 1)
-    /// }
+    ///   do {
+    ///     let response = try await GPTBridge.listAssistants(
+    ///         paginatedBy: PaginatedRequestParameters(
+    ///           limit: 10,
+    ///           order: .descending
+    ///         )
+    ///     )
+    ///     if var hasMore = response.hasMore {
+    ///       assistants += response.data
+    ///       while hasMore {
+    ///         let lastId = assistants.last?.id
+    ///         let paginationRequest = PaginatedRequestParameters(
+    ///             limit: 10,
+    ///             startAfter: lastId ?? "",
+    ///             order: .descending
+    ///         )
+    ///         let response = try await GPTBridge.listAssistants paginatedBy: paginationRequest)
+    ///         hasMore = response.hasMore ?? false
+    ///         assistants += response.data
+    ///       }
+    ///     }
     /// ```
     public static func listAssistants(
         orgId: String? = nil,
