@@ -38,7 +38,7 @@ struct GetMessageResponse: DecodableResponse {
 }
 
 struct MessageResponse: DecodableResponse {
-    let data: [GetMessageResponse]
+    var data: [GetMessageResponse]
 }
 
 /// headers for Messages
