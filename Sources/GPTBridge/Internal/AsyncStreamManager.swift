@@ -15,6 +15,51 @@ protocol StreamingRequestManageable: RequestManageable {
     ) async throws -> AsyncThrowingStream<DeltaEvent, any Error> where U: EncodableRequest
 }
 
+/// Represents the various run status events that can be streamed.
+public enum RunStatusEvent {
+    case runStepCreated(RunStepResult)
+    case runStepInProgress(RunStepResult)
+    case runStepCompleted(RunStepResult)
+    case messageDelta(MessageRunStepResult)
+    case messageCompleted(ChatMessage)
+    case runCompleted(RunStepResult)
+    case runFailed(RunStepResult)
+    case runCancelled(RunStepResult)
+    case runExpired(RunStepResult)
+    case errorOccurred(OpenAIJSONError)     // Represents an error event from the stream
+    case done               // Indicates the stream has finished (completion marker)
+    case unknown(event: String, data: String)  // Fallback for unrecognized events
+
+    var key: String {
+        switch self {
+        case .runStepCreated:
+            "thread.run.step.created"
+        case .runStepCompleted:
+            "thread.run.step.completed"
+        case .runStepInProgress:
+            "thread.run.step.in_progress"
+        case .messageDelta:
+            "thread.message.delta"
+        case .messageCompleted:
+            "thread.message.completed"
+        case .runCompleted:
+            "thread.run.completed"
+        case .runFailed:
+            "thread.run.failed"
+        case .runCancelled:
+            "thread.run.cancelled"
+        case .runExpired:
+            "thread.run.expired"
+        case .errorOccurred:
+            "error"
+        case .done:
+            "done"
+        case .unknown:
+            "thread.unknown"
+        }
+    }
+}
+
 struct StreamingRequestManager: StreamingRequestManageable {
     var baseURL: URL
 
