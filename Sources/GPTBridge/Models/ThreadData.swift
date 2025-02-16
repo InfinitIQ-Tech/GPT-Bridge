@@ -1,6 +1,6 @@
 //
-//  Thread.swift
-//  SlackMojiChef
+//  ThreadData.swift
+//  GPTBridge
 //
 //  Created by Kenneth Dubroff on 12/9/23.
 //

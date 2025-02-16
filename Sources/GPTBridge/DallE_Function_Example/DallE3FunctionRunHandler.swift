@@ -1,6 +1,6 @@
 //
-//  FunctionRunHandler.swift
-//  SlackMojiChef
+//  DallE3FunctionRunHandler.swift
+//  GPTBridge
 //
 //  Created by Kenneth Dubroff on 12/16/23.
 //

@@ -1,6 +1,6 @@
 //
-//  Models.swift
-//  SlackMojiChef
+//  HTTPModels.swift
+//  GPTBridge
 //
 //  Created by Kenneth Dubroff on 12/5/23.
 //

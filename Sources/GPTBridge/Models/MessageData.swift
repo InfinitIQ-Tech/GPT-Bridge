@@ -1,6 +1,6 @@
 //
-//  File.swift
-//  SlackMojiChef
+//  MessageData.swift
+//  GPTBridge
 //
 //  Created by Kenneth Dubroff on 12/9/23.
 //

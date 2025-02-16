@@ -1,6 +1,6 @@
 //
 //  AssistantAPIService.swift
-//  SlackMojiChef
+//  GPTBridge
 //
 //  Created by Kenneth Dubroff on 12/10/23.
 //
