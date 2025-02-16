@@ -15,6 +15,7 @@ enum HttpMethod: String {
 /// Endpoints for the OpenAI Assistants API
 enum AssistantEndpoint {
     case threads
+    case runs
     case addMessage(threadId: String)
     case createRun(threadId: String)
     case runThread(threadId: String, runId: String)
@@ -42,6 +43,8 @@ enum AssistantEndpoint {
             runEndpoint(threadId: threadId, runId: runId) + "/cancel"
         case .listAssistants:
             "/assistants"
+        case .runs:
+            "/threads/runs"
         case .submitToolOutputs(let threadId, let runId):
             runEndpoint(threadId: threadId, runId: runId) + "/submit_tool_outputs"
         }
