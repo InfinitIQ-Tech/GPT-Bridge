@@ -39,11 +39,22 @@ public struct ChatMessage: Codable, OpenAIMessageable, Identifiable {
     public var content: String
     public var role: Role
 
+    enum CodingKeys: String, CodingKey {
+        case content
+        case role
+    }
+
     public init(from decoder: any Decoder) throws {
         self.id = UUID().uuidString
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self.content = try container.decode(String.self, forKey: .content)
         self.role = try container.decode(Role.self, forKey: .role)
+    }
+
+    public func encode(to encoder: any Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(content, forKey: .content)
+        try container.encode(role, forKey: .role)
     }
 
     public init(content: String, role: Role = .user) {
