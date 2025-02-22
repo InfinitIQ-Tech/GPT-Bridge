@@ -300,7 +300,7 @@ public class GPTBridge {
     /// ```
     public static func createAndStreamThreadRun(assistantId: String, thread: Thread) async throws -> AsyncThrowingStream<RunStatusEvent, Swift.Error> {
         let request = CreateAndRunThreadRequest(thread: thread, assistantId: assistantId)
-        return try await streamingRequestManager.createAndStreamThreadRun(endpoint: .runs, method: .POST, requestData: request)
+        return try await streamingRequestManager.streamThreadRun(endpoint: .runs, method: .POST, requestData: request)
     }
 
     /// Add a message to an existing thread, create a new run, and stream it
@@ -335,11 +335,19 @@ public class GPTBridge {
     ///   }
     /// ```
     public static func addMessageAndStreamThreadRun(text: String, threadId: String, assistandId: String) async throws -> AsyncThrowingStream<RunStatusEvent, Swift.Error> {
-        try await streamingRequestManager.pollRunStatusStream(endpoint: .addMessage(threadId: threadId))
+        let messageRequest = AddMessageToThreadRequest(content: text)
+        let _: MessageResponse = try await requestManager.makeRequest(endpoint: .addMessage(threadId: threadId), method: .POST, requestData: messageRequest)
+
+        let runRequest: CreateThreadRunRequest = CreateThreadRunRequest(assistantId: assistandId)
+
+        return try await streamingRequestManager.streamThreadRun(endpoint: .createRun(threadId: threadId), method: .POST, requestData: runRequest)
+
     }
 
     public static func createAndStreamThreadRun(text: String, assistantId: String) async throws -> AsyncThrowingStream<RunStatusEvent, Swift.Error> {
-        try await streamingRequestManager.pollRunStatusStream(endpoint: .threads, httpMethod: .POST)
+        let thread = Thread(messages: [ChatMessage(content: text)])
+        let request = CreateAndRunThreadRequest(thread: thread, assistantId: assistantId)
+        return try await streamingRequestManager.streamThreadRun(endpoint: .threads, method: .POST, requestData: request)
     }
 
 
