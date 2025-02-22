@@ -17,7 +17,7 @@ struct CreateAndRunThreadRequest: EncodableRequest {
 }
 
 /// JSON payload including the thread's ID
-struct CreateThreadResponse: DecodableResponse {
+public struct CreateThreadResponse: DecodableResponse {
     let id: String
 }
 
