@@ -17,7 +17,7 @@ protocol StreamingRequestManageable: RequestManageable {
 
 /// Represents the various run status events that can be streamed.
 public enum RunStatusEvent {
-    case threadCreated(CreateThreadResponse)
+    case threadCreated(String)
     case runStepCreated(RunStepResult)
     case runStepInProgress(RunStepResult)
     case runStepCompleted(RunStepResult)
@@ -266,7 +266,7 @@ struct StreamingRequestManager: StreamingRequestManageable {
                                 switch eventType {
                                 case "thread.created":
                                     if let threadResponse = try? JSONDecoder().decode(CreateThreadResponse.self, from: Data(dataBuffer.utf8)) {
-                                        continuation.yield(.threadCreated(threadResponse))
+                                        continuation.yield(.threadCreated(threadResponse.id))
                                     }
                                 case "thread.run.step.created":
                                     if let step = try? JSONDecoder().decode(MessageRunStepResult.self, from: Data(dataBuffer.utf8)) {
