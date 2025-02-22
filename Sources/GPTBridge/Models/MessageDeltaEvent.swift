@@ -8,23 +8,23 @@
 
 import Foundation
 
-public struct DeltaEvent: Codable {
+public struct MessageDeltaEvent: Codable {
     public let id: String
     public let object: String
-    public let delta: Delta
+    public let delta: MessageDelta
 }
 
-public struct Delta: Codable {
-    public let content: [Content]
+public struct MessageDelta: Codable {
+    public let content: [MessageDeltaContent]
 }
 
-public struct Content: Codable {
+public struct MessageDeltaContent: Codable {
     public let index: Int
     public let type: String
-    public let text: Text
+    public let text: MessageDeltaText
 }
 
-public struct Text: Codable {
+public struct MessageDeltaText: Codable {
     public let value: String
     public let annotations: [String]?
 }

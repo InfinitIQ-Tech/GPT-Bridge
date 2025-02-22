@@ -298,7 +298,7 @@ public class GPTBridge {
     ///  }
     ///}
     /// ```
-    public static func createAndStreamThreadRun(assistantId: String, thread: Thread) async throws -> AsyncThrowingStream<DeltaEvent, Swift.Error> {
+    public static func createAndStreamThreadRun(assistantId: String, thread: Thread) async throws -> AsyncThrowingStream<MessageDeltaEvent, Swift.Error> {
         let request = CreateAndRunThreadRequest(thread: thread, assistantId: assistantId)
         return try await streamingRequestManager.makeRequest(endpoint: .runs, method: .POST, requestData: request)
     }

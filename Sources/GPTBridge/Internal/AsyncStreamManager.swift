@@ -12,7 +12,7 @@ protocol StreamingRequestManageable: RequestManageable {
         endpoint: AssistantEndpoint,
         method: HttpMethod,
         requestData: U?
-    ) async throws -> AsyncThrowingStream<DeltaEvent, any Error> where U: EncodableRequest
+    ) async throws -> AsyncThrowingStream<MessageDeltaEvent, any Error> where U: EncodableRequest
 }
 
 /// Represents the various run status events that can be streamed.
@@ -74,10 +74,10 @@ struct StreamingRequestManager: StreamingRequestManageable {
         endpoint: AssistantEndpoint,
         method: HttpMethod,
         requestData: U?
-    ) async throws -> AsyncThrowingStream<DeltaEvent, any Error>
+    ) async throws -> AsyncThrowingStream<MessageDeltaEvent, any Error>
     where U : EncodableRequest {
 
-        AsyncThrowingStream<DeltaEvent, any Error> { continuation in
+        AsyncThrowingStream<MessageDeltaEvent, any Error> { continuation in
             Task {
                 do {
                     let endpointURL = makeURL(fromEndpoint: endpoint)
@@ -172,7 +172,7 @@ struct StreamingRequestManager: StreamingRequestManageable {
                             let chunkData = Data(dataValue.utf8)
                             do {
                                 let decoder = JSONDecoder()
-                                let partialResponse = try decoder.decode(DeltaEvent.self, from: chunkData)
+                                let partialResponse = try decoder.decode(MessageDeltaEvent.self, from: chunkData)
                                 continuation.yield(partialResponse)
                             } catch {
                                 continue
