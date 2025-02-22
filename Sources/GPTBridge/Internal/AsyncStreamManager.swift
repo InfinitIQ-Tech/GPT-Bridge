@@ -8,11 +8,11 @@
 import Foundation
 
 protocol StreamingRequestManageable: RequestManageable {
-    func makeRequest<U: EncodableRequest>(
-        endpoint: AssistantEndpoint,
-        method: HttpMethod,
-        requestData: U?
-    ) async throws -> AsyncThrowingStream<MessageDeltaEvent, any Error> where U: EncodableRequest
+//    func makeRequest<U: EncodableRequest>(
+//        endpoint: AssistantEndpoint,
+//        method: HttpMethod,
+//        requestData: U?
+//    ) async throws -> AsyncThrowingStream<MessageDeltaEvent, any Error> where U: EncodableRequest
 }
 
 /// Represents the various run status events that can be streamed.
@@ -70,14 +70,14 @@ struct StreamingRequestManager: StreamingRequestManageable {
         self.baseURL = baseURL
     }
 
-    func makeRequest<U>(
+    func createAndStreamThreadRun<U>(
         endpoint: AssistantEndpoint,
         method: HttpMethod,
         requestData: U?
-    ) async throws -> AsyncThrowingStream<MessageDeltaEvent, any Error>
+    ) async throws -> AsyncThrowingStream<RunStatusEvent, any Error>
     where U : EncodableRequest {
 
-        AsyncThrowingStream<MessageDeltaEvent, any Error> { continuation in
+        AsyncThrowingStream<RunStatusEvent, any Error> { continuation in
             Task {
                 do {
                     let endpointURL = makeURL(fromEndpoint: endpoint)
@@ -168,12 +168,10 @@ struct StreamingRequestManager: StreamingRequestManageable {
                                 return
                             }
 
-                            // Try decoding this line as `DeltaEvent`
+                            // handle run status events
                             let chunkData = Data(dataValue.utf8)
                             do {
-                                let decoder = JSONDecoder()
-                                let partialResponse = try decoder.decode(MessageDeltaEvent.self, from: chunkData)
-                                continuation.yield(partialResponse)
+                                
                             } catch {
                                 continue
                             }
@@ -199,9 +197,8 @@ struct StreamingRequestManager: StreamingRequestManageable {
     ///   - timeout: Timeout interval (in seconds) to stop if no events are received (prevents hanging).
     /// - Returns: An `AsyncThrowingStream` of `RunStatusEvent` values that can be awaited.
     func pollRunStatusStream(
-        threadId: String,
-        runId: String,
         endpoint: AssistantEndpoint,
+        httpMethod: HttpMethod = .GET,
         timeout: TimeInterval = 30.0
     ) async throws -> AsyncThrowingStream<RunStatusEvent, any Error> {
         // A class is used so both tasks see the *same* lastEventTime.
@@ -212,9 +209,9 @@ struct StreamingRequestManager: StreamingRequestManageable {
 
         return AsyncThrowingStream<RunStatusEvent, any Error> { continuation in
             // Build your SSE endpoint, request, etc.
-            let url = URL(string: "https://api.openai.com/v1/assistants/\(threadId)/runs/\(runId)?stream=true")!
+            guard let url = URL(string: endpoint.path + "?stream=true") else { continuation.finish(); return }
             var request = URLRequest(url: url)
-            request.httpMethod = "GET"
+            request.httpMethod = httpMethod.rawValue
             request.setValue("text/event-stream", forHTTPHeaderField: "Accept")
 
             // 1) Task for reading the SSE stream
