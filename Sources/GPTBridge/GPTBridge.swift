@@ -336,7 +336,7 @@ public class GPTBridge {
     /// ```
     public static func addMessageAndStreamThreadRun(text: String, threadId: String, assistandId: String) async throws -> AsyncThrowingStream<RunStatusEvent, Swift.Error> {
         let messageRequest = AddMessageToThreadRequest(content: text)
-        let _: MessageResponse = try await requestManager.makeRequest(endpoint: .addMessage(threadId: threadId), method: .POST, requestData: messageRequest)
+        let _: AddMessageToThreadResponse = try await requestManager.makeRequest(endpoint: .addMessage(threadId: threadId), method: .POST, requestData: messageRequest)
 
         let runRequest: CreateThreadRunRequest = CreateThreadRunRequest(assistantId: assistandId, stream: true)
 
