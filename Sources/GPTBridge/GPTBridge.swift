@@ -311,7 +311,7 @@ public class GPTBridge {
     /// - Returns: An Async Throwing Stream emitting `RunStatusEvent` objects
     /// - Usage Example:
     /// ```swift
-    /// let stream = try await GPTBridge.addMessageAndStreamThreadRun(text: text, threadId: threadId, assistandId: assistantId)
+    /// let stream = try await GPTBridge.addMessageAndStreamThreadRun(text: text, threadId: threadId, assistantdId: assistantId)
     /// for try await event in stream {
     ///   switch event {
     ///     case .messageDelta(let runStepResult):
@@ -334,11 +334,11 @@ public class GPTBridge {
     ///       break
     ///   }
     /// ```
-    public static func addMessageAndStreamThreadRun(text: String, threadId: String, assistandId: String) async throws -> AsyncThrowingStream<RunStatusEvent, Swift.Error> {
+    public static func addMessageAndStreamThreadRun(text: String, threadId: String, assistantId: String) async throws -> AsyncThrowingStream<RunStatusEvent, Swift.Error> {
         let messageRequest = AddMessageToThreadRequest(content: text)
         let _: AddMessageToThreadResponse = try await requestManager.makeRequest(endpoint: .addMessage(threadId: threadId), method: .POST, requestData: messageRequest)
 
-        let runRequest: CreateThreadRunRequest = CreateThreadRunRequest(assistantId: assistandId, stream: true)
+        let runRequest: CreateThreadRunRequest = CreateThreadRunRequest(assistantId: assistantId, stream: true)
 
         return try await streamingRequestManager.streamThreadRun(endpoint: .createRun(threadId: threadId), method: .POST, requestData: runRequest)
 
@@ -349,7 +349,6 @@ public class GPTBridge {
         let request = CreateAndRunThreadRequest(thread: thread, assistantId: assistantId)
         return try await streamingRequestManager.streamThreadRun(endpoint: .threads, method: .POST, requestData: request)
     }
-
 
     /// Cancel the current run manually
     /// This is useful for reducing processing time in the OpenAI API when the assistant doesn't need to know the results of a function call
