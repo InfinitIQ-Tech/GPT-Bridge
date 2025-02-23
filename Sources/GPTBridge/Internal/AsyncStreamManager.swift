@@ -42,7 +42,7 @@ public enum RunStatusEvent {
     static let runCancelledKey = "thread.run.cancelled"
     static let runExpiredKey = "thread.run.expired"
     static let errorOccurredKey = "error"
-    static let doneKey = "[DONE]"
+    static let doneKey = "done"
     static let unknownThreadStatusKey = "thread.unknown"
 
 }
