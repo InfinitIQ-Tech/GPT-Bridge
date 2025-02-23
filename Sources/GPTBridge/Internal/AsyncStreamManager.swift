@@ -65,6 +65,7 @@ struct StreamingRequestManager: StreamingRequestManageable {
         var request = URLRequest(url: makeURL(fromEndpoint: endpoint))
         request.httpMethod = method.rawValue
         request.allHTTPHeaderFields = requestData?.jsonPayloadHeaders
+        request.setValue("text/event-stream", forHTTPHeaderField: "Accept")
 
         if let requestData = requestData, method != .GET {
             request.httpBody = try requestData.encodeInstance()
