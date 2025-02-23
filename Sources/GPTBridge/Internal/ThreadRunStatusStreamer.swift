@@ -35,13 +35,13 @@ struct ThreadRunStatusStreamer {
                     var currentEventType: String? = nil
                     var eventDataBuffer = ""
 
-                    for try await line in byteStream.lines {
+                    for try await rawLine in byteStream.linesPreservingEmpty() {
                         // Update last-event time on every line
                         eventTracker.lastEventTime = Date()
-                        
-//                        let line = rawLine.trimmingCharacters(in: .whitespacesAndNewlines)
-//
-//                        print(line)
+
+                        let line = rawLine.trimmingCharacters(in: .whitespacesAndNewlines)
+
+                        print(line)
                         if line.hasPrefix("event:") {
                             currentEventType = line
                                 .dropFirst("event:".count)
@@ -243,5 +243,39 @@ extension URLSession.AsyncBytes {
             buffer.append(chunk)
         }
         return (buffer, URLResponse())
+    }
+
+    func linesPreservingEmpty() -> AsyncThrowingStream<String, Error> {
+        AsyncThrowingStream { continuation in
+            let task = Task {
+                var buffer = [UInt8]()
+                var iterator = self.makeAsyncIterator()
+
+                do {
+                    while let byte = try await iterator.next() {
+                        if byte == UInt8(ascii: "\n") {
+                            // Reached end of a line
+                            let lineStr = String(decoding: buffer, as: UTF8.self)
+                            continuation.yield(lineStr)
+                            buffer.removeAll(keepingCapacity: true)
+                        } else if byte == UInt8(ascii: "\r") {
+                            // SSE often has CR+LF. Skip the CR. We'll handle LF above.
+                            continue
+                        } else {
+                            buffer.append(byte)
+                        }
+                    }
+                    // If there's a trailing line with no final \n:
+                    if !buffer.isEmpty {
+                        let lineStr = String(decoding: buffer, as: UTF8.self)
+                        continuation.yield(lineStr)
+                    }
+                    continuation.finish()
+                } catch {
+                    continuation.finish(throwing: error)
+                }
+            }
+            continuation.onTermination = { _ in task.cancel() }
+        }
     }
 }
