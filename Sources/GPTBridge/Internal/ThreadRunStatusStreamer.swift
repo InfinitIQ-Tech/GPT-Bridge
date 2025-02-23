@@ -178,8 +178,8 @@ struct ThreadRunStatusStreamer {
 
         case RunStatusEvent.messageDeltaKey:
             print("message delta received with data \(String(data: data, encoding: .utf8) ?? "No Data")")
-            if let delta = try? MessageDelta.createInstanceFrom(data: data) {
-                let message = delta.content.first?.text.value ?? "Error Retrieving Message"
+            if let event = try? MessageDeltaEvent.createInstanceFrom(data: data) {
+                let message = event.delta.content.first?.text.value ?? "Error Retrieving Message"
                 continuation.yield(.messageDelta(message))
             } else {
                 continuation.yield(.unknown(event: trimmedEventType, data: eventData))
