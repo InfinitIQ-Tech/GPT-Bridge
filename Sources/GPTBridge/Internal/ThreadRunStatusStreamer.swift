@@ -35,13 +35,13 @@ struct ThreadRunStatusStreamer {
                     var currentEventType: String? = nil
                     var eventDataBuffer = ""
 
-                    for try await rawLine in byteStream.lines {
+                    for try await line in byteStream.lines {
                         // Update last-event time on every line
                         eventTracker.lastEventTime = Date()
-
-                        let line = rawLine.trimmingCharacters(in: .whitespacesAndNewlines)
-
-                        print(line)
+                        
+//                        let line = rawLine.trimmingCharacters(in: .whitespacesAndNewlines)
+//
+//                        print(line)
                         if line.hasPrefix("event:") {
                             currentEventType = line
                                 .dropFirst("event:".count)
