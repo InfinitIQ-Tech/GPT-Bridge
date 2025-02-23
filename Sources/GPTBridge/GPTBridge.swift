@@ -338,7 +338,7 @@ public class GPTBridge {
         let messageRequest = AddMessageToThreadRequest(content: text)
         let _: MessageResponse = try await requestManager.makeRequest(endpoint: .addMessage(threadId: threadId), method: .POST, requestData: messageRequest)
 
-        let runRequest: CreateThreadRunRequest = CreateThreadRunRequest(assistantId: assistandId)
+        let runRequest: CreateThreadRunRequest = CreateThreadRunRequest(assistantId: assistandId, stream: true)
 
         return try await streamingRequestManager.streamThreadRun(endpoint: .createRun(threadId: threadId), method: .POST, requestData: runRequest)
 
