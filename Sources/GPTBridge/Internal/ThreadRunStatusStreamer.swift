@@ -40,7 +40,7 @@ struct ThreadRunStatusStreamer {
                         eventTracker.lastEventTime = Date()
 
                         let line = rawLine.trimmingCharacters(in: .whitespacesAndNewlines)
-                        guard !line.isEmpty else { continue }  // skip keep-alive / blank lines
+
                         print(line)
                         if line.hasPrefix("event:") {
                             currentEventType = line
