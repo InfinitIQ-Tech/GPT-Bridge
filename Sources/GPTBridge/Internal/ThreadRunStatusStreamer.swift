@@ -184,8 +184,9 @@ struct ThreadRunStatusStreamer {
 
         case RunStatusEvent.messageCompletedKey:
             print("message completed with data \(String(data: data, encoding: .utf8) ?? "No Data")")
-            if let msg = try? JSONDecoder().decode(ChatMessage.self, from: data) {
-                continuation.yield(.messageCompleted(msg))
+            if let response = try? JSONDecoder().decode(StreamingMessageResponse.self, from: data) {
+                let assistantMessage = ChatMessage(content: response.content.first?.text.value ?? "Error Retrieving Message", role: response.role)
+                continuation.yield(.messageCompleted(assistantMessage))
             } else {
                 continuation.yield(.unknown(event: trimmedEventType, data: eventData))
             }
