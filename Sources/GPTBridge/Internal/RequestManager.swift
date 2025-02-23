@@ -115,8 +115,8 @@ struct OpenAIJSONErrorWrapper: Decodable {
 }
 
 public struct OpenAIJSONError: Decodable {
-    let message: String
-    let type: String?
-    let param: String?
-    let code: Int?
+    public let message: String
+    public let type: String?
+    public let param: String?
+    public let code: Int?
 }
