@@ -143,6 +143,7 @@ struct ThreadRunStatusStreamer {
 
         switch trimmedEventType {
         case RunStatusEvent.threadCreatedKey:
+            print("thread created with data \(String(data: data, encoding: .utf8) ?? "No Data")")
             if let threadResp = try? JSONDecoder().decode(CreateThreadResponse.self, from: data) {
                 continuation.yield(.threadCreated(threadResp.id))
             } else {
@@ -150,6 +151,7 @@ struct ThreadRunStatusStreamer {
             }
 
         case RunStatusEvent.runStepCreatedKey:
+            print("run step created with data \(String(data: data, encoding: .utf8) ?? "No Data")")
             if let step = try? JSONDecoder().decode(MessageRunStepResult.self, from: data) {
                 continuation.yield(.runStepCreated(step))
             } else {
@@ -157,6 +159,7 @@ struct ThreadRunStatusStreamer {
             }
 
         case RunStatusEvent.runStepInProgressKey:
+            print("run step in progress with data \(String(data: data, encoding: .utf8) ?? "No Data")")
             if let step = try? JSONDecoder().decode(MessageRunStepResult.self, from: data) {
                 continuation.yield(.runStepInProgress(step))
             } else {
@@ -164,6 +167,7 @@ struct ThreadRunStatusStreamer {
             }
 
         case RunStatusEvent.runStepCompletedKey:
+            print("run step completed with data \(String(data: data, encoding: .utf8) ?? "No Data")")
             if let step = try? JSONDecoder().decode(MessageRunStepResult.self, from: data) {
                 continuation.yield(.runStepCompleted(step))
             } else {
@@ -171,6 +175,7 @@ struct ThreadRunStatusStreamer {
             }
 
         case RunStatusEvent.messageDeltaKey:
+            print("message delta received with data \(String(data: data, encoding: .utf8) ?? "No Data")")
             if let delta = try? JSONDecoder().decode(MessageRunStepResult.self, from: data) {
                 continuation.yield(.messageDelta(delta))
             } else {
@@ -178,6 +183,7 @@ struct ThreadRunStatusStreamer {
             }
 
         case RunStatusEvent.messageCompletedKey:
+            print("message completed with data \(String(data: data, encoding: .utf8) ?? "No Data")")
             if let msg = try? JSONDecoder().decode(ChatMessage.self, from: data) {
                 continuation.yield(.messageCompleted(msg))
             } else {
@@ -185,6 +191,7 @@ struct ThreadRunStatusStreamer {
             }
 
         case RunStatusEvent.runCompletedKey:
+            print("run completed with data \(String(data: data, encoding: .utf8) ?? "No Data")")
             if let runResult = try? JSONDecoder().decode(MessageRunStepResult.self, from: data) {
                 continuation.yield(.runCompleted(runResult))
             } else {
@@ -197,13 +204,17 @@ struct ThreadRunStatusStreamer {
             // Differentiate if needed
             if let runResult = try? JSONDecoder().decode(MessageRunStepResult.self, from: data) {
                 if trimmedEventType == RunStatusEvent.runFailedKey {
+                    print("run failed")
                     continuation.yield(.runFailed(runResult))
                 } else if trimmedEventType == RunStatusEvent.runCancelledKey {
+                    print("run cancelled")
                     continuation.yield(.runCancelled(runResult))
                 } else {
+                    print("run expired")
                     continuation.yield(.runExpired(runResult))
                 }
             } else {
+                print("unknown event \(trimmedEventType) received with data \(eventData)")
                 continuation.yield(.unknown(event: trimmedEventType, data: eventData))
             }
 
