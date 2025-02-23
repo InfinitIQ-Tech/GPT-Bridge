@@ -21,7 +21,7 @@ public enum RunStatusEvent {
     case runStepCreated(RunStepResult)
     case runStepInProgress(RunStepResult)
     case runStepCompleted(RunStepResult)
-    case messageDelta(MessageDelta)
+    case messageDelta(String)
     case messageCompleted(ChatMessage)
     case runCompleted(RunStepResult)
     case runFailed(RunStepResult)
