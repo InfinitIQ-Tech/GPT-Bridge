@@ -178,7 +178,7 @@ struct ThreadRunStatusStreamer {
 
         case RunStatusEvent.messageDeltaKey:
             print("message delta received with data \(String(data: data, encoding: .utf8) ?? "No Data")")
-            if let delta = try? MessageRunStepResult.createInstanceFrom(data: data) {
+            if let delta = try? MessageDelta.createInstanceFrom(data: data) {
                 continuation.yield(.messageDelta(delta))
             } else {
                 continuation.yield(.unknown(event: trimmedEventType, data: eventData))

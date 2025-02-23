@@ -14,7 +14,7 @@ public struct MessageDeltaEvent: Codable {
     public let delta: MessageDelta
 }
 
-public struct MessageDelta: Codable {
+public struct MessageDelta: Codable, DecodableResponse {
     public let content: [MessageDeltaContent]
 }
 
