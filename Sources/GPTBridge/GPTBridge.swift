@@ -314,10 +314,8 @@ public class GPTBridge {
     /// let stream = try await GPTBridge.addMessageAndStreamThreadRun(text: text, threadId: threadId, assistantdId: assistantId)
     /// for try await event in stream {
     ///   switch event {
-    ///     case .messageDelta(let runStepResult):
-    ///       if let partialMessage = runStepResult.message {
-    ///         self.streamingText += partialMessage
-    ///     }
+    ///     case .messageDelta(let text):
+    ///         self.streamingText += text
     ///     case .messageCompleted(let message):
     ///       self.messages.append(message)
     ///     case .done, .runFailed:
