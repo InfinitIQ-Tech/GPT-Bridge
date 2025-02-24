@@ -41,7 +41,6 @@ struct ThreadRunStatusStreamer {
 
                         let line = rawLine.trimmingCharacters(in: .whitespacesAndNewlines)
 
-                        print(line)
                         if line.hasPrefix("event:") {
                             currentEventType = line
                                 .dropFirst("event:".count)
@@ -145,7 +144,6 @@ struct ThreadRunStatusStreamer {
 
         switch trimmedEventType {
         case RunStatusEvent.threadCreatedKey:
-            print("thread created with data \(String(data: data, encoding: .utf8) ?? "No Data")")
             if let threadResp = try? CreateThreadResponse.createInstanceFrom(data: data) {
                 continuation.yield(.threadCreated(threadResp.id))
             } else {
@@ -153,7 +151,6 @@ struct ThreadRunStatusStreamer {
             }
 
         case RunStatusEvent.runStepCreatedKey:
-            print("run step created with data \(String(data: data, encoding: .utf8) ?? "No Data")")
             if let step = try? MessageRunStepResult.createInstanceFrom(data: data) {
                 continuation.yield(.runStepCreated(step))
             } else {
@@ -161,7 +158,6 @@ struct ThreadRunStatusStreamer {
             }
 
         case RunStatusEvent.runStepInProgressKey:
-            print("run step in progress with data \(String(data: data, encoding: .utf8) ?? "No Data")")
             if let step = try? MessageRunStepResult.createInstanceFrom(data: data) {
                 continuation.yield(.runStepInProgress(step))
             } else {
@@ -169,7 +165,6 @@ struct ThreadRunStatusStreamer {
             }
 
         case RunStatusEvent.runStepCompletedKey:
-            print("run step completed with data \(String(data: data, encoding: .utf8) ?? "No Data")")
             if let step = try? MessageRunStepResult.createInstanceFrom(data: data) {
                 continuation.yield(.runStepCompleted(step))
             } else {
@@ -177,7 +172,6 @@ struct ThreadRunStatusStreamer {
             }
 
         case RunStatusEvent.messageDeltaKey:
-            print("message delta received with data \(String(data: data, encoding: .utf8) ?? "No Data")")
             if let event = try? MessageDeltaEvent.createInstanceFrom(data: data) {
                 let message = event.delta.content.first?.text.value ?? "Error Retrieving Message"
                 continuation.yield(.messageDelta(message))
@@ -186,7 +180,6 @@ struct ThreadRunStatusStreamer {
             }
 
         case RunStatusEvent.messageCompletedKey:
-            print("message completed with data \(String(data: data, encoding: .utf8) ?? "No Data")")
             if let response = try? StreamingMessageResponse.createInstanceFrom(data: data) {
                 let assistantMessage = ChatMessage(content: response.content.first?.text.value ?? "Error Retrieving Message", role: response.role)
                 continuation.yield(.messageCompleted(assistantMessage))
@@ -195,7 +188,6 @@ struct ThreadRunStatusStreamer {
             }
 
         case RunStatusEvent.runCompletedKey:
-            print("run completed with data \(String(data: data, encoding: .utf8) ?? "No Data")")
             if let runResult = try? MessageRunStepResult.createInstanceFrom(data: data) {
                 continuation.yield(.runCompleted(runResult))
             } else {
