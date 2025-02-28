@@ -39,12 +39,13 @@ class AssistantChatViewModel: ObservableObject {
         let result = try await GPTBridge.createAndStreamThreadRun(assistantId: activeAssistant.id, thread: thread)
         // handle the async stream
         for try await event in result {
-            // ** only handle text deltas **
-            event.delta.content.forEach { [weak self] delta in
-                guard let self else { return }
-                DispatchQueue.main.async {
-                    self.streamingText += delta.text.value
-                }
+            switch event {
+            case .threadCreated(let threadId):
+                self.threadId = threadId
+            case .messageDelta(let text):
+                self.streamingText += text
+            default:
+                break
             }
         }
         // Update UI
@@ -70,13 +71,11 @@ class AssistantChatViewModel: ObservableObject {
         }
 
         let assistantId = assistantId ?? self.activeAssistant.id
-        let stream = try await GPTBridge.addMessageAndStreamThreadRun(text: text, threadId: threadId, assistandId: assistantId)
+        let stream = try await GPTBridge.addMessageAndStreamThreadRun(text: text, threadId: threadId, assistantId: assistantId)
         for try await event in stream {
             switch event {
-            case .messageDelta(let runStepResult):
-                if let partialMessage = runStepResult.message {
-                    self.streamingText += partialMessage
-                }
+            case .messageDelta(let partialMessage):
+                self.streamingText += partialMessage
             case .messageCompleted(let message):
                 resetStream(usingChatMessage: message)
             case .done, .runFailed:
