@@ -72,6 +72,6 @@ struct StreamingRequestManager: StreamingRequestManageable {
         }
 
         // Simply call your SSEStreamer
-        return ThreadRunStatusStreamer().streamRunStatusEvents(with: request, inactivityTimeout: timeout)
+        return ThreadRunStreamHandler().streamRunStatusEvents(with: request, inactivityTimeout: timeout)
     }
 }

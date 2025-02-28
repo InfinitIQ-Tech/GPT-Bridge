@@ -8,7 +8,7 @@
 import Foundation
 
 /// Handles streaming of run-status events for a "thread run" via SSE.
-struct ThreadRunStatusStreamer {
+struct ThreadRunStreamHandler {
 
     /// Streams "thread run status" events from a given request.
     /// - Parameters:
@@ -82,7 +82,7 @@ struct ThreadRunStatusStreamer {
                 }
             }
 
-            // 2) Optional watchdog task for inactivity
+            // 2) Watchdog task for inactivity
             let watchdogTask = Task {
                 guard let timeout = inactivityTimeout else { return }
                 while !Task.isCancelled {
@@ -197,7 +197,6 @@ struct ThreadRunStatusStreamer {
         case RunStatusEvent.runFailedKey,
              RunStatusEvent.runCancelledKey,
              RunStatusEvent.runExpiredKey:
-            // Differentiate if needed
             if let runResult = try? MessageRunStepResult.createInstanceFrom(data: data) {
                 if trimmedEventType == RunStatusEvent.runFailedKey {
                     print("run failed")
