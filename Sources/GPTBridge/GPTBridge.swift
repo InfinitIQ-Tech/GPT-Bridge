@@ -284,11 +284,11 @@ public class GPTBridge {
     /// - Parameters:
     ///   - text: The content of the message to add to the thread
     ///   - threadId: The existing thread's id
-    ///   - assistandId: The id of the assistant who will run the thread
+    ///   - assistantId: The id of the assistant who will run the thread
     /// - Returns: An Async Throwing Stream emitting `RunStatusEvent` objects
     /// - Usage Example:
     /// ```swift
-    /// let stream = try await GPTBridge.addMessageAndStreamThreadRun(text: text, threadId: threadId, assistantdId: assistantId)
+    /// let stream = try await GPTBridge.addMessageAndStreamThreadRun(text: text, threadId: threadId, assistantId: assistantId)
     /// for try await event in stream {
     ///   switch event {
     ///     case .messageDelta(let text):

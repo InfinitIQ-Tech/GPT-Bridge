@@ -55,7 +55,7 @@ class AssistantChatViewModel: ObservableObject {
 
     /// Add a message to an existing thread and stream the run
     /// - Parameters:
-    ///   - assistandId: If nil, the activeAssistantId (if set) will be used
+    ///   - assistantId: If nil, the activeAssistantId (if set) will be used
     ///   - text: The message to add to the thread
     func addMessageToThreadAndRun(assistantId: String? = nil, withContent text: String) async throws {
         if self.threadId == nil {
