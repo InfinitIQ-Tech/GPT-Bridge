@@ -8,7 +8,7 @@
 
 import Foundation
 
-public struct MessageDeltaEvent: Codable {
+public struct MessageDeltaEvent: Codable, DecodableResponse {
     public let id: String
     public let object: String
     public let delta: MessageDelta

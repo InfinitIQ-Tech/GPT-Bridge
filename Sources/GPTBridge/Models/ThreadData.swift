@@ -18,6 +18,6 @@ struct CreateAndRunThreadRequest: EncodableRequest {
 
 /// JSON payload including the thread's ID
 public struct CreateThreadResponse: DecodableResponse {
-    let id: String
+    public let id: String
 }
 

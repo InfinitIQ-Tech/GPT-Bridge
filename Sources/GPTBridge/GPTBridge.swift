@@ -280,44 +280,19 @@ public class GPTBridge {
         }
     }
     
-    /// Create a new thread and stream the first run
-    /// - Parameters:
-    ///   - assistantId: The assistant ID of the assistant who will be running the thread
-    ///   - thread: A `Thread` containing an array of `ChatMessage`
-    /// - Returns: An Async Throwing Stream of `DeltaEvent`, `Error`
-    /// - Usage Example:
-    /// ```swift
-    ///let result = try await GPTBridge.createAndStreamThreadRun(assistantId: activeAssistant.id, thread: thread)
-    ///// handle the async stream
-    ///for try await event in result {
-    ///  // ** only handle message deltas **
-    ///  event.delta.content.forEach { [weak self] delta in
-    ///  guard let self else { return }
-    ///  DispatchQueue.main.async {
-    ///    self.streamingText += delta.text.value
-    ///  }
-    ///}
-    /// ```
-    public static func createAndStreamThreadRun(assistantId: String, thread: Thread) async throws -> AsyncThrowingStream<MessageDeltaEvent, Swift.Error> {
-        let request = CreateAndRunThreadRequest(thread: thread, assistantId: assistantId)
-        return try await streamingRequestManager.makeRequest(endpoint: .runs, method: .POST, requestData: request)
-    }
-
-    /// Add a message to an existing thread, create a new run, and stream it
+    /// Add a message to an existing thread, create a new run using any assistant, and stream it
     /// - Parameters:
     ///   - text: The content of the message to add to the thread
     ///   - threadId: The existing thread's id
-    ///   - assistandId: The id of the assistant who will run the thread
+    ///   - assistantId: The id of the assistant who will run the thread
     /// - Returns: An Async Throwing Stream emitting `RunStatusEvent` objects
     /// - Usage Example:
     /// ```swift
-    /// let stream = try await GPTBridge.addMessageAndStreamThreadRun(text: text, threadId: threadId, assistandId: assistantId)
+    /// let stream = try await GPTBridge.addMessageAndStreamThreadRun(text: text, threadId: threadId, assistantId: assistantId)
     /// for try await event in stream {
     ///   switch event {
-    ///     case .messageDelta(let runStepResult):
-    ///       if let partialMessage = runStepResult.message {
-    ///         self.streamingText += partialMessage
-    ///     }
+    ///     case .messageDelta(let text):
+    ///         self.streamingText += text
     ///     case .messageCompleted(let message):
     ///       self.messages.append(message)
     ///     case .done, .runFailed:
@@ -334,13 +309,62 @@ public class GPTBridge {
     ///       break
     ///   }
     /// ```
-    public static func addMessageAndStreamThreadRun(text: String, threadId: String, assistandId: String) async throws -> AsyncThrowingStream<RunStatusEvent, Swift.Error> {
-        try await addMessageToThread(message: text, threadId: threadId)
-        let runId = try await createRun(threadId: threadId, assistantId: assistandId)
+    public static func addMessageAndStreamThreadRun(text: String, threadId: String, assistantId: String) async throws -> AsyncThrowingStream<RunStatusEvent, Swift.Error> {
+        let messageRequest = AddMessageToThreadRequest(content: text)
+        let _: AddMessageToThreadResponse = try await requestManager.makeRequest(endpoint: .addMessage(threadId: threadId), method: .POST, requestData: messageRequest)
 
-        return try await streamingRequestManager.pollRunStatusStream(threadId: threadId, runId: runId, endpoint: .createRun(threadId: threadId))
+        let runRequest: CreateThreadRunRequest = CreateThreadRunRequest(assistantId: assistantId, stream: true)
+
+        return try await streamingRequestManager.streamThreadRun(endpoint: .createRun(threadId: threadId), method: .POST, requestData: runRequest)
+
     }
 
+    /// Create a new thread with a single message from the user and stream the first run
+    /// - Parameters:
+    ///   - assistantId: The assistant ID of the assistant who will be running the thread
+    ///   - text: The user's message to the assistant
+    /// - Returns: An Async Throwing Stream of `RunStatusEvent`, `Error`
+    /// - Streaming Text Usage Example:
+    /// ```swift
+    ///  let userMessage = "Hello assistant!"
+    ///  let result = try await GPTBridge.createAndStreamThreadRun(assistantId: activeAssistant.id, text: userMessage)
+    ///  // handle the async stream
+    ///  for try await event in stream {
+    ///    switch event {
+    ///      case .messageDelta(let text):
+    ///          self.streamingText += text
+    ///      default:
+    ///        break
+    ///    }
+    /// ```
+    public static func createAndStreamThreadRun(text: String, assistantId: String) async throws -> AsyncThrowingStream<RunStatusEvent, Swift.Error> {
+        let thread = Thread(messages: [ChatMessage(content: text)])
+        let request = CreateAndRunThreadRequest(thread: thread, assistantId: assistantId)
+        return try await streamingRequestManager.streamThreadRun(endpoint: .threads, method: .POST, requestData: request)
+    }
+
+    /// Create a new thread with one or more messages and stream the first run
+    /// - Parameters:
+    ///   - assistantId: The assistant ID of the assistant who will be running the thread
+    ///   - thread: A `Thread` containing an array of `ChatMessage`
+    /// - Returns: An Async Throwing Stream of `RunStatusEvent`, `Error`
+    /// - Streaming Text Usage Example:
+    /// ```swift
+    ///  let thread = Thread(messages: [ChatMessage(content: "You are being used in an app called MyApp. You will respond to the user appropriately.", role: .assistant), ChatMessage(content: "Assistant, do a cool thing this app does", role: .user)])
+    ///  let result = try await GPTBridge.createAndStreamThreadRun(assistantId: activeAssistant.id, thread: thread)
+    ///  // handle the async stream
+    ///  for try await event in stream {
+    ///    switch event {
+    ///      case .messageDelta(let text):
+    ///          self.streamingText += text
+    ///      default:
+    ///        break
+    ///    }
+    /// ```
+    public static func createAndStreamThreadRun(assistantId: String, thread: Thread) async throws -> AsyncThrowingStream<RunStatusEvent, Swift.Error> {
+        let request = CreateAndRunThreadRequest(thread: thread, assistantId: assistantId)
+        return try await streamingRequestManager.streamThreadRun(endpoint: .runs, method: .POST, requestData: request)
+    }
 
     /// Cancel the current run manually
     /// This is useful for reducing processing time in the OpenAI API when the assistant doesn't need to know the results of a function call

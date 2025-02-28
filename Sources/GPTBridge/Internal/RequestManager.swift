@@ -114,9 +114,12 @@ struct OpenAIJSONErrorWrapper: Decodable {
     let error: OpenAIJSONError
 }
 
-public struct OpenAIJSONError: Decodable {
-    let message: String
-    let type: String?
-    let param: String?
-    let code: Int?
+public struct OpenAIJSONError: Decodable, Identifiable {
+    public var id: String {
+        UUID().uuidString
+    }
+    public let message: String
+    public let type: String?
+    public let param: String?
+    public let code: Int?
 }

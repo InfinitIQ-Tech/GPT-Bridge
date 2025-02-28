@@ -31,7 +31,7 @@ public struct FunctionRunStepResult: RunStepResult {
     }
 }
 
-public struct MessageRunStepResult: RunStepResult {
+public struct MessageRunStepResult: RunStepResult, DecodableResponse {
     public var functions: [AssistantFunction]? = nil
     public var message: String?
 

@@ -46,3 +46,12 @@ struct AddMessageToThreadResponse: DecodableResponse {
     let id: String
     let content: [MessageTextObject]
 }
+
+// MARK: Streaming Response
+struct StreamingMessageResponse: DecodableResponse {
+    let role: Role
+    let assistantId: String
+    let threadId: String
+    let runId: String
+    let content: [MessageTextObject]
+}
