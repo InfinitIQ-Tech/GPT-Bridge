@@ -340,7 +340,7 @@ public class GPTBridge {
     public static func createAndStreamThreadRun(text: String, assistantId: String) async throws -> AsyncThrowingStream<RunStatusEvent, Swift.Error> {
         let thread = Thread(messages: [ChatMessage(content: text)])
         let request = CreateAndRunThreadRequest(thread: thread, assistantId: assistantId)
-        return try await streamingRequestManager.streamThreadRun(endpoint: .threads, method: .POST, requestData: request)
+        return try await streamingRequestManager.streamThreadRun(endpoint: .runs, method: .POST, requestData: request)
     }
 
     /// Create a new thread with one or more messages and stream the first run
