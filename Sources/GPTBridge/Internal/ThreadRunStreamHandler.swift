@@ -20,8 +20,14 @@ struct ThreadRunStreamHandler {
     ) -> AsyncThrowingStream<RunStatusEvent, Error> {
 
         // Tracks when we last received any SSE data, for the timeout logic.
-        class LastEventTracker {
-            var lastEventTime = Date()
+        actor LastEventTracker {
+            private var lastEventTime = Date()
+            func updateLastEventTime() {
+                lastEventTime = Date()
+            }
+            func getLastEventTime() -> Date {
+                lastEventTime
+            }
         }
         let eventTracker = LastEventTracker()
 
@@ -37,7 +43,7 @@ struct ThreadRunStreamHandler {
 
                     for try await rawLine in byteStream.linesPreservingEmpty() {
                         // Update last-event time on every line
-                        eventTracker.lastEventTime = Date()
+                        await eventTracker.updateLastEventTime()
 
                         let line = rawLine.trimmingCharacters(in: .whitespacesAndNewlines)
 
@@ -87,7 +93,7 @@ struct ThreadRunStreamHandler {
                 guard let timeout = inactivityTimeout else { return }
                 while !Task.isCancelled {
                     try? await Task.sleep(nanoseconds: 1_000_000_000)
-                    let elapsed = Date().timeIntervalSince(eventTracker.lastEventTime)
+                    let elapsed = await Date().timeIntervalSince(eventTracker.getLastEventTime())
                     if elapsed > timeout {
                         eventReadingTask.cancel()
                         let errorInfo = OpenAIJSONError(
