@@ -21,7 +21,7 @@ class DallEFunctionRunHandler: FunctionRunHandlable {
     var functionParameters: [String : FunctionArgument]?
     var requiredAction: RequiredAction?
     // MARK: RunHandler implementation
-    var runThreadResponse: RunThreadResponse
+    var runThreadResponse: RunThreadResponse?
 
     /// The image name the assistant generated
     var imageName: String?

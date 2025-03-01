@@ -139,7 +139,7 @@ struct ToolCall: DecodableResponse {
     let function: AssistantFunction
 }
 
-public struct AssistantFunction: DecodableResponse {
+public struct AssistantFunction: DecodableResponse, Equatable {
     public let name: String
     public let arguments: [String: FunctionArgument]
 
@@ -169,5 +169,9 @@ public struct AssistantFunction: DecodableResponse {
         }
 
         arguments = try JSONDecoder().decode([String: FunctionArgument].self, from: data)
+    }
+
+    public static func == (lhs: AssistantFunction, rhs: AssistantFunction) -> Bool {
+        lhs.name == rhs.name
     }
 }

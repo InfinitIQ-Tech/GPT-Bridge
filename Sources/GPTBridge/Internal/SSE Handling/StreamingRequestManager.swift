@@ -7,14 +7,6 @@
 
 import Foundation
 
-protocol StreamingRequestManageable: RequestManageable {
-//    func makeRequest<U: EncodableRequest>(
-//        endpoint: AssistantEndpoint,
-//        method: HttpMethod,
-//        requestData: U?
-//    ) async throws -> AsyncThrowingStream<MessageDeltaEvent, any Error> where U: EncodableRequest
-}
-
 /// Represents the various run status events that can be streamed.
 public enum RunStatusEvent {
     case threadCreated(String)
@@ -23,6 +15,11 @@ public enum RunStatusEvent {
     case runStepCompleted(RunStepResult)
     case messageDelta(String)
     case messageCompleted(ChatMessage)
+    /// The assistant has used a function and returned the parameters
+    /// If it's important in your app for the assistant to know the result of the function generation,
+    /// call `GPTBridge.submitToolOutputs(...`
+    /// otherwise, call `GPTBridge.cancelRun(...` as a cost-savings measure
+    case runRequiresAction(AssistantFunctionResponse) // the assistant generated values using one of its functions
     case runCompleted(RunStepResult)
     case runFailed(RunStepResult)
     case runCancelled(RunStepResult)
@@ -37,6 +34,7 @@ public enum RunStatusEvent {
     static let runStepInProgressKey = "thread.run.step.in_progress"
     static let messageDeltaKey = "thread.message.delta"
     static let messageCompletedKey = "thread.message.completed"
+    static let runRequiresActionKey = "thread.run.requires_action"
     static let runCompletedKey = "thread.run.completed"
     static let runFailedKey = "thread.run.failed"
     static let runCancelledKey = "thread.run.cancelled"
@@ -44,10 +42,9 @@ public enum RunStatusEvent {
     static let errorOccurredKey = "error"
     static let doneKey = "done"
     static let unknownThreadStatusKey = "thread.unknown"
-
 }
 
-struct StreamingRequestManager: StreamingRequestManageable {
+struct StreamingRequestManager: RequestManageable {
     var baseURL: URL
 
     init(baseURL: URL = URL(string: Self.baseURLString)!) {
@@ -71,7 +68,40 @@ struct StreamingRequestManager: StreamingRequestManageable {
             request.httpBody = try requestData.encodeInstance()
         }
 
-        // Simply call your SSEStreamer
         return ThreadRunStreamHandler().streamRunStatusEvents(with: request, inactivityTimeout: timeout)
+    }
+}
+
+public class AssistantFunctionResponse {
+    let runId: String
+    let toolCalls: [ToolCall]
+    let streamingRequestManager = StreamingRequestManager()
+    /// [ToolCall.id: AssistantFunction]
+    public let assistantFunctions: [String: AssistantFunction]
+
+    init(runId: String, toolCalls: [ToolCall]) {
+        self.runId = runId
+        self.toolCalls = toolCalls
+        self.assistantFunctions = toolCalls.reduce(into: [:]) {
+            $0[$1.id] = $1.function
+        }
+    }
+
+    public func sendToolCallResponse(threadId: String, function: AssistantFunction, withMessage message: String = "200 OK") async throws -> AsyncThrowingStream<RunStatusEvent, Error>{
+        let responseMessage = """
+                              Received arguments: \(function.arguments)
+                              Message: \(message)
+                              """
+        let toolCallfunctions = toolCalls.filter { $0.function == function }
+        let id = toolCallfunctions.first?.id ?? ""
+        let outputs = [ToolCallOutput(toolCallId: id, output: responseMessage)]
+
+        let request = ToolCallRequest(toolOutputs: outputs, stream: true)
+
+        return try await streamingRequestManager.streamThreadRun(endpoint: .submitToolOutputs(threadId: threadId, runId: runId), method: .POST, requestData: request)
+    }
+
+    public func cancelRun(threadId: String) async throws {
+        try await GPTBridge.cancelRun(threadId: threadId, runId: runId)
     }
 }

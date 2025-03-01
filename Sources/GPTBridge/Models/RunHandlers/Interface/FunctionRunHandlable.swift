@@ -17,13 +17,15 @@ extension FunctionRunHandlable {
     private var noActionRetrievedError: NSError {
         NSError(domain: "noActionRetrievedError", code: 0, userInfo: nil)
     }
-
+    /// Parse `RequiredAction` to retrieve function calls (`ToolCall`)
+    /// - throws: `noActionRetrievedError` if `requiredAction` is nil or there are no function calls
+    /// - returns: [ToolCall.id: FunctionArgument]
     func parse() throws -> [String: FunctionArgument] {
        guard let action = requiredAction,
              action.submitToolOutputs.toolCalls.count > 0
        else {
            throw noActionRetrievedError
        }
-       return action.submitToolOutputs.toolCalls[0].function.arguments // TODO: Generic arguments
+        return action.submitToolOutputs.toolCalls.reduce(into: [:]) { $0 = $1.function.arguments }
     }
 }

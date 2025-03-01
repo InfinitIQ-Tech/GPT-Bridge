@@ -12,7 +12,7 @@ class MessageRunHandler: RunHandler {
         case noMessageId
     }
 
-    let runThreadResponse: RunThreadResponse
+    let runThreadResponse: RunThreadResponse?
 
     /// The Thread Run's ID
     private let runID: String
