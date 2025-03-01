@@ -9,6 +9,7 @@ import Foundation
 
 struct ToolCallRequest: EncodableRequest {
     let toolOutputs: [ToolCallOutput]
+    var stream: Bool = false
 }
 
 public struct ToolCallOutput: Encodable {
