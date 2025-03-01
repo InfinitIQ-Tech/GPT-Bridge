@@ -122,6 +122,17 @@ struct ThreadRunStreamHandler: SSEStreamHandlable {
                 return .errorOccurred(fallbackError)
             }
 
+        case RunStatusEvent.runRequiresActionKey:
+               if let response = try? RunThreadResponse.createInstanceFrom(data: data) {
+                   let toolCalls = response.requiredAction?.submitToolOutputs.toolCalls ?? []
+                   let response = AssistantFunctionResponse(runId: response.id, toolCalls: toolCalls)
+                   return .runRequiresAction(response)
+               } else {
+                   print("Required Action Event Emitted, but can't parse data")
+                   return handleUnknownEvent(eventType, data: eventData)
+               }
+
+
         case RunStatusEvent.doneKey:
             return .done
 
