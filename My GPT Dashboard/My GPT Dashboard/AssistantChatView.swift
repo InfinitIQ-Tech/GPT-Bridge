@@ -44,8 +44,55 @@ class AssistantChatViewModel: ObservableObject {
                 self.threadId = threadId
             case .messageDelta(let text):
                 self.streamingText += text
+            case .messageCompleted(let message):
+                resetStream(usingChatMessage: message)
+            case .runRequiresAction(let response):
+                let functions = response.assistantFunctions
+                
+                for (toolCallId, function) in functions {
+                    for argument in function.arguments {
+                        let argumentKey = argument.key
+                        streamingText += "Key: \(argumentKey)\n"
+
+                        if let argumentValue = argument.value.asString {
+                            streamingText += "Value: \(argumentValue)\n"
+                        // You setup complex JSON that includes a dictionary of Key: Decodable/FunctionArgument
+                        } else if let argumentValue = argument.value.asStringDecodableDictionary {
+                            // TODO: Init your custom type with these keys and values
+                            let myArgumentKey = "key"
+                            if let value = argumentValue[myArgumentKey]?.asString {
+                                streamingText += "Value: \(value)\n"
+                            } else {
+                                // just stream them
+                                for (key, argument) in argumentValue {
+                                    streamingText += "Custom Argument: \(key): \(argument)\n"
+                                }
+                            }
+                            // your argument value is an array of some type
+                        } else if let argumentValue = argument.value.asArray() {
+                            // you will need to downcast from here
+                            for value in argumentValue {
+                                if let functionArgumentValue = value.asStringDecodableDictionary {
+                                    for (key, value) in functionArgumentValue {
+                                        streamingText += "Custom Argument: \(key): \(value.asString ?? "No Argument")\n"
+                                    }
+                                } else {
+                                    streamingText += "Value: \(value)\n"
+                                }
+                            }
+                        } else {
+                            streamingText += "Value: \(argument.value)\n"
+                        }
+                        streamingText += "\n"
+                    }
+                    let message = ChatMessage(content: streamingText, role: .assistant)
+                    resetStream(usingChatMessage: message)
+                    let stream = try await response.sendToolCallResponse(threadId: threadId ?? "", function: function)
+                    try await handleStream(stream)
+                }
             default:
-                break
+                let message = ChatMessage(content: streamingText, role: .assistant)
+                resetStream(usingChatMessage: message)
             }
         }
         // Update UI
@@ -54,24 +101,7 @@ class AssistantChatViewModel: ObservableObject {
     }
 
 
-    /// Add a message to an existing thread and stream the run
-    /// - Parameters:
-    ///   - assistantId: If nil, the activeAssistantId (if set) will be used
-    ///   - text: The message to add to the thread
-    func addMessageToThreadAndRun(assistantId: String? = nil, withContent text: String) async throws {
-        if self.threadId == nil {
-            let message = ChatMessage(content: text, role: .user)
-            messages.append(message)
-            try await createAndRunThread()
-            return
-        }
-
-        guard let threadId else {
-            throw Error.noActiveThread
-        }
-
-        let assistantId = assistantId ?? self.activeAssistant.id
-        let stream = try await GPTBridge.addMessageAndStreamThreadRun(text: text, threadId: threadId, assistantId: assistantId)
+    fileprivate func handleStream(_ stream: AsyncThrowingStream<RunStatusEvent, Swift.Error>) async throws {
         for try await event in stream {
             switch event {
             case .messageDelta(let partialMessage):
@@ -92,12 +122,35 @@ class AssistantChatViewModel: ObservableObject {
             }
         }
     }
+    
+    /// Add a message to an existing thread and stream the run
+    /// - Parameters:
+    ///   - assistantId: If nil, the activeAssistantId (if set) will be used
+    ///   - text: The message to add to the thread
+    func addMessageToThreadAndRun(assistantId: String? = nil, withContent text: String) async throws {
+        if self.threadId == nil {
+            let message = ChatMessage(content: text, role: .user)
+            messages.append(message)
+            try await createAndRunThread()
+            return
+        }
+
+        guard let threadId else {
+            throw Error.noActiveThread
+        }
+
+        let assistantId = assistantId ?? self.activeAssistant.id
+        let stream = try await GPTBridge.addMessageAndStreamThreadRun(text: text, threadId: threadId, assistantId: assistantId)
+        try await handleStream(stream)
+    }
 
     private func resetStream(usingChatMessage chatMessage: ChatMessage) {
         if !self.streamingText.isEmpty {
             self.streamingText = ""
         }
-        self.messages.append(chatMessage)
+        if !chatMessage.content.isEmpty {
+            self.messages.append(chatMessage)
+        }
     }
 
     func createThread() async throws {
