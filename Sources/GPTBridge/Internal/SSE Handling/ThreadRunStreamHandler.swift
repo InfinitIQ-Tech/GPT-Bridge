@@ -62,37 +62,39 @@ struct ThreadRunStreamHandler: SSEStreamHandlable {
             if let step = try? MessageRunStepResult.createInstanceFrom(data: data) {
                 return .runStepInProgress(step)
             } else {
-                return .unknown(event: trimmedEventType, data: eventData)
+
+                return handleUnknownEvent(trimmedEventType, data: eventData)
             }
 
         case RunStatusEvent.runStepCompletedKey:
             if let step = try? MessageRunStepResult.createInstanceFrom(data: data) {
                 return .runStepCompleted(step)
             } else {
-                return .unknown(event: trimmedEventType, data: eventData)
+                return handleUnknownEvent(trimmedEventType, data: eventData)
             }
 
         case RunStatusEvent.messageDeltaKey:
             if let event = try? MessageDeltaEvent.createInstanceFrom(data: data) {
-                let message = event.delta.content.first?.text.value ?? "Error Retrieving Message"
+                let message = event.delta.content.first?.text.value ?? ""
                 return .messageDelta(message)
             } else {
-                return .unknown(event: trimmedEventType, data: eventData)
+                return handleUnknownEvent(trimmedEventType, data: eventData)
             }
 
         case RunStatusEvent.messageCompletedKey:
             if let response = try? StreamingMessageResponse.createInstanceFrom(data: data) {
-                let assistantMessage = ChatMessage(content: response.content.first?.text.value ?? "Error Retrieving Message", role: response.role)
+                let assistantMessage = ChatMessage(content: response.content.first?.text.value ?? "", role: response.role)
                 return .messageCompleted(assistantMessage)
             } else {
-                return .unknown(event: trimmedEventType, data: eventData)
+                print("message completed event received, but message can't be parsed")
+                return handleUnknownEvent(trimmedEventType, data: eventData)
             }
 
         case RunStatusEvent.runCompletedKey:
             if let runResult = try? MessageRunStepResult.createInstanceFrom(data: data) {
                 return .runCompleted(runResult)
             } else {
-                return .unknown(event: trimmedEventType, data: eventData)
+                return handleUnknownEvent(trimmedEventType, data: eventData)
             }
 
         case RunStatusEvent.runFailedKey,
@@ -110,8 +112,7 @@ struct ThreadRunStreamHandler: SSEStreamHandlable {
                     return .runExpired(runResult)
                 }
             } else {
-                print("unknown event \(trimmedEventType) received with data \(eventData)")
-                return .unknown(event: trimmedEventType, data: eventData)
+                return handleUnknownEvent(trimmedEventType, data: eventData)
             }
 
         case RunStatusEvent.errorOccurredKey:
@@ -137,10 +138,15 @@ struct ThreadRunStreamHandler: SSEStreamHandlable {
             return .done
 
         default:
-            return .unknown(event: trimmedEventType, data: eventData)
+            return handleUnknownEvent(trimmedEventType, data: eventData)
         }
-        // unhandled
-        return .unknown(event: trimmedEventType, data: eventData)
+        return handleUnknownEvent(trimmedEventType, data: eventData)
+    }
+
+    private func handleUnknownEvent(_ event: String, data: String) -> RunStatusEvent {
+        // for debug
+//        print("Unhandled SSE event: \(event), data: \(data)")
+        return .unknown(event: event, data: data)
     }
 }
 
