@@ -86,7 +86,14 @@ public class AssistantFunctionResponse {
             $0[$1.id] = $1.function
         }
     }
-
+    /// Inform the assistant that you received function arguments.
+    /// - NOTE: By default, a message of the received arguments and "200 OK" is sent.
+    /// Override `withMessage` to change the '200 OK' portion
+    /// - returns: AsyncThrowingStream<RunStatusEvent, Error>.
+    /// The assistant may decide to send a messag and terminate the run, run another function, or use another tool.
+    /// handle this stream to receive the result
+    /// - WARNING: If you do NOT want the assistant to continue the run past this point, do not call this method.
+    /// Instead, call `cancelRun(threadId: String)`
     public func sendToolCallResponse(threadId: String, function: AssistantFunction, withMessage message: String = "200 OK") async throws -> AsyncThrowingStream<RunStatusEvent, Error>{
         let responseMessage = """
                               Received arguments: \(function.arguments)
@@ -100,7 +107,11 @@ public class AssistantFunctionResponse {
 
         return try await streamingRequestManager.streamThreadRun(endpoint: .submitToolOutputs(threadId: threadId, runId: runId), method: .POST, requestData: request)
     }
-
+    /// Cancel the run after receiving the function arguments from the assistant.
+    ///
+    /// Use Cases:
+    /// - You don't care to retrieve a response from the assistant
+    /// - You want to save on costs (the longer the run is left active, the higher the cost)
     public func cancelRun(threadId: String) async throws {
         try await GPTBridge.cancelRun(threadId: threadId, runId: runId)
     }
