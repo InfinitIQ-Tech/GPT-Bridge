@@ -90,11 +90,15 @@ public class AssistantFunctionResponse {
     /// - NOTE: By default, a message of the received arguments and "200 OK" is sent.
     /// Override `withMessage` to change the '200 OK' portion
     /// - returns: AsyncThrowingStream<RunStatusEvent, Error>.
-    /// The assistant may decide to send a messag and terminate the run, run another function, or use another tool.
+    /// The assistant may decide to send a message and terminate the run, run another function, or use another tool.
     /// handle this stream to receive the result
     /// - WARNING: If you do NOT want the assistant to continue the run past this point, do not call this method.
     /// Instead, call `cancelRun(threadId: String)`
-    public func sendToolCallResponse(threadId: String, function: AssistantFunction, withMessage message: String = "200 OK") async throws -> AsyncThrowingStream<RunStatusEvent, Error>{
+    public func sendToolCallResponse(
+        threadId: String,
+        function: AssistantFunction,
+        withMessage message: String = "200 OK"
+    ) async throws -> AsyncThrowingStream<RunStatusEvent, Error>{
         let responseMessage = """
                               Received arguments: \(function.arguments)
                               Message: \(message)
