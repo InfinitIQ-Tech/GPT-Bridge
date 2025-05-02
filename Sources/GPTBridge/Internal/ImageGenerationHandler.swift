@@ -93,6 +93,7 @@ public class ImageGenerationHandler {
         let (data, urlResponse) = try await URLSession.shared.data(for: request)
         guard let httpResponse = urlResponse as? HTTPURLResponse,
               httpResponse.statusCode >= 200 && httpResponse.statusCode < 300 else {
+            print("bad response when generating image: \(String(data: data, encoding: .utf8) ?? "no data")" )
             throw Error.badResponse
         }
         let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
