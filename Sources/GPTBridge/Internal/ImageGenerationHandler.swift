@@ -25,6 +25,12 @@ public enum ImageModel: String {
     case dalle3 = "dall-e-3"
 }
 
+public enum ImageBackground: String {
+    case transparent
+    case opaque
+    case auto
+}
+
 /// Handles image generation via OpenAI's /v1/images/generations endpoint
 public class ImageGenerationHandler {
     public enum Error: Swift.Error {
@@ -52,9 +58,9 @@ public class ImageGenerationHandler {
     /// The size requested
     public let size: ImageSize
     /// The background requested
-    public let background: String?
+    public let background: ImageBackground
 
-    private init(imageURL: URL?, prompt: String, model: ImageModel, quality: ImageQuality, size: ImageSize, background: String?) {
+    private init(imageURL: URL?, prompt: String, model: ImageModel, quality: ImageQuality, size: ImageSize, background: ImageBackground) {
         self.imageURL = imageURL
         self.prompt = prompt
         self.model = model
@@ -73,7 +79,7 @@ public class ImageGenerationHandler {
     ///   - n: Number of images (default: 1)
     /// - Returns: An ImageGenerationHandler instance with the image URL
     @discardableResult
-    public static func generateImage(prompt: String, quality: ImageQuality = .high, size: ImageSize = .square, background: String? = "white", model: ImageModel = .dalle3, n: Int = 1) async throws -> ImageGenerationHandler {
+    public static func generateImage(prompt: String, quality: ImageQuality = .high, size: ImageSize = .square, background: ImageBackground = .auto, model: ImageModel = .dalle3, n: Int = 1) async throws -> ImageGenerationHandler {
         let url = URL(string: "https://api.openai.com/v1/images/generations")!
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
@@ -83,7 +89,7 @@ public class ImageGenerationHandler {
             prompt: prompt,
             quality: quality.rawValue,
             size: size.rawValue,
-            background: background,
+            background: background.rawValue,
             model: model.rawValue,
             n: n
         )
