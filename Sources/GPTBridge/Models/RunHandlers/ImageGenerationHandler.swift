@@ -1,29 +1,29 @@
 import Foundation
 
-public enum ImageQuality: String {
-    case low
-    case medium
-    case high
-}
-
-public enum ImageSize: String {
-    case square = "1024x1024"
-    case landsacape = "1536x1024"
-    case portrait = "1024x1536"
-    case auto
-}
-
-public enum ImageModel: String {
-    case gptImage = "gpt-image-1"
-    case dalle2 = "dall-e-2"
-    case dalle3 = "dall-e-3"
-}
-
 /// Handles image generation via OpenAI's /v1/images/generations endpoint
-class ImageGenerationHandler {
+public class ImageGenerationHandler {
     enum Error: Swift.Error {
         case badResponse
         case noImageData
+    }
+
+    public enum ImageQuality: String {
+        case low
+        case medium
+        case high
+    }
+
+    public enum ImageSize: String {
+        case square = "1024x1024"
+        case landsacape = "1536x1024"
+        case portrait = "1024x1536"
+        case auto
+    }
+
+    public enum ImageModel: String {
+        case gptImage = "gpt-image-1"
+        case dalle2 = "dall-e-2"
+        case dalle3 = "dall-e-3"
     }
 
     struct GenerationRequest: Codable {
