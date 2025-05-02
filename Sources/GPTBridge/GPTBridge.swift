@@ -465,4 +465,15 @@ public class GPTBridge {
         return messageTextResponse.content[0].text.value
     }
 
+    /// Generate an image using OpenAI's /v1/images/generations endpoint
+    /// - Parameters:
+    ///   - prompt: The prompt describing the desired image
+    ///   - quality: The quality of the image (default: "high")
+    ///   - size: The size of the image (default: "1024x1024")
+    ///   - background: The background color (default: "white"). Do not use "transparent".
+    /// - Returns: The URL of the saved PNG image
+    public static func generateImage(prompt: String, quality: String = "high", size: String = "1024x1024", background: String = "white") async throws -> URL {
+        return try await ImageGenerationHandler.generateImage(prompt: prompt, quality: quality, size: size, background: background)
+    }
+
 }
