@@ -474,7 +474,7 @@ public class GPTBridge {
     ///   - model: The image generation model to use
     ///     - [GPTImage, Dall-E-2, Dall-E-3]
     /// - Returns: The URL of the saved PNG image
-    public static func generateImage(prompt: String, quality: ImageQuality = .high, size: ImageSize = .auto, background: String = "transparent", model: ImageModel = .gptImage) async throws -> URL {
+    public static func generateImage(prompt: String, quality: ImageQuality = .high, size: ImageSize = .auto, background: String = "transparent", model: ImageModel = .gptImage) async throws -> ImageGenerationHandler {
         return try await ImageGenerationHandler.generateImage(prompt: prompt, quality: quality, size: size, background: background, model: model)
     }
 
