@@ -470,10 +470,12 @@ public class GPTBridge {
     ///   - prompt: The prompt describing the desired image
     ///   - quality: The quality of the image (default: "high")
     ///   - size: The size of the image (default: "1024x1024")
-    ///   - background: The background color (default: "white"). Do not use "transparent".
+    ///   - background: The background color (default: "transparent")
+    ///   - model: The image generation model to use
+    ///     - [GPTImage, Dall-E-2, Dall-E-3]
     /// - Returns: The URL of the saved PNG image
-    public static func generateImage(prompt: String, quality: String = "high", size: String = "1024x1024", background: String = "white") async throws -> URL {
-        return try await ImageGenerationHandler.generateImage(prompt: prompt, quality: quality, size: size, background: background)
+    public static func generateImage(prompt: String, quality: ImageQuality = .high, size: ImageSize = .auto, background: String = "transparent", model: ImageModel = .gptImage) async throws -> URL {
+        return try await ImageGenerationHandler.generateImage(prompt: prompt, quality: quality, size: size, background: background, model: model)
     }
 
 }
