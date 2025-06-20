@@ -44,10 +44,14 @@ public enum RunStatusEvent {
 }
 
 struct StreamingRequestManager: RequestManageable {
+    public enum RequestManagerError: Swift.Error {
+        case badBaseURL
+    }
+
     var baseURL: URL
 
-    init?(baseURLString: String = Self.baseURLString) {
-        guard let url = URL(string: baseURLString) else { return nil }
+    init(baseURLString: String = Self.baseURLString) throws {
+        guard let url = URL(string: baseURLString) else { throw RequestManagerError.badBaseURL  }
         self.baseURL = url
     }
 
@@ -79,7 +83,10 @@ public class AssistantFunctionResponse {
 
     let runId: String
     let toolCalls: [ToolCall]
-    let streamingRequestManager = StreamingRequestManager()
+
+    func streamingRequestManager() throws -> StreamingRequestManager {
+        try StreamingRequestManager()
+    }
     /// [ToolCall.id: AssistantFunction]
     public let assistantFunctions: [String: AssistantFunction]
 
@@ -118,9 +125,8 @@ public class AssistantFunctionResponse {
         let outputs = [ToolCallOutput(toolCallId: id, output: responseMessage)]
 
         let request = ToolCallRequest(toolOutputs: outputs, stream: true)
-        guard let streamingRequestManager else { throw Error.noStreamingRequestManager }
 
-        return try await streamingRequestManager.streamThreadRun(endpoint: .submitToolOutputs(threadId: threadId, runId: runId), method: .POST, requestData: request)
+        return try await streamingRequestManager().streamThreadRun(endpoint: .submitToolOutputs(threadId: threadId, runId: runId), method: .POST, requestData: request)
     }
     /// Cancel the run after receiving the function arguments from the assistant.
     ///
