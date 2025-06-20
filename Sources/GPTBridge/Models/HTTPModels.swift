@@ -5,7 +5,7 @@
 //  Created by Kenneth Dubroff on 12/5/23.
 //
 
-import SwiftUI
+import Foundation
 /// HTTP Request Method
 enum HttpMethod: String {
     case POST

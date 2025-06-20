@@ -57,7 +57,7 @@ struct RequestManager {
                         }
 
                         guard let idBaseString = message.components(separatedBy: "run_").last,
-                              let id = idBaseString.components(separatedBy: .whitespaces).first else {
+                              let id = idBaseString.components(separatedBy: CharacterSet.whitespaces).first else {
                             throw RequestError.openAIErrorMessage(message)
                         }
 

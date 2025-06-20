@@ -5,7 +5,7 @@
 //  Created by Kenneth Dubroff on 12/16/23.
 //
 
-import SwiftUI
+import Foundation
 
 protocol FunctionRunHandlable: RunHandler {
     var requiredAction: RequiredAction? { get }
