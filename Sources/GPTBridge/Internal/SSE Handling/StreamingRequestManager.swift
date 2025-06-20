@@ -47,8 +47,9 @@ public enum RunStatusEvent {
 struct StreamingRequestManager: RequestManageable {
     var baseURL: URL
 
-    init(baseURL: URL = URL(string: Self.baseURLString)!) {
-        self.baseURL = baseURL
+    init?(baseURLString: String = Self.baseURLString) {
+        guard let url = URL(string: baseURLString) else { return nil }
+        self.baseURL = url
     }
 
     func streamThreadRun<U>(
