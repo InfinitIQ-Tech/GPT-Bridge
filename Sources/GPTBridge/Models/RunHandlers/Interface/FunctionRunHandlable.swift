@@ -21,13 +21,13 @@ extension FunctionRunHandlable {
     /// - throws: `noActionRetrievedError` if `requiredAction` is nil or there are no function calls
     /// - returns: [ToolCall.id: FunctionArgument]
     func parse() throws -> [String: FunctionArgument] {
-       guard let action = requiredAction,
-             action.submitToolOutputs.toolCalls.count > 0
-       else {
-           throw noActionRetrievedError
-       }
-return action.submitToolOutputs.toolCalls.reduce(into: [:]) { partialResult, toolCall in
-    partialResult[toolCall.id] = toolCall.function.arguments
-}
+        guard let action = requiredAction,
+              action.submitToolOutputs.toolCalls.count > 0
+        else {
+            throw noActionRetrievedError
+        }
+        return action.submitToolOutputs.toolCalls.reduce(into: [:]) { partialResult, toolCall in
+            partialResult[toolCall.id] = toolCall.function.arguments.first?.value
+        }
     }
 }
