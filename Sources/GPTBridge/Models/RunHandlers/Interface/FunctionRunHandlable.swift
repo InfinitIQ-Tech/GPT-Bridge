@@ -26,6 +26,8 @@ extension FunctionRunHandlable {
        else {
            throw noActionRetrievedError
        }
-        return action.submitToolOutputs.toolCalls.reduce(into: [:]) { $0 = $1.function.arguments }
+return action.submitToolOutputs.toolCalls.reduce(into: [:]) { partialResult, toolCall in
+    partialResult[toolCall.id] = toolCall.function.arguments
+}
     }
 }
