@@ -77,10 +77,6 @@ struct StreamingRequestManager: RequestManageable {
 }
 
 public class AssistantFunctionResponse {
-    enum Error: Swift.Error {
-        case noStreamingRequestManager
-    }
-
     let runId: String
     let toolCalls: [ToolCall]
 

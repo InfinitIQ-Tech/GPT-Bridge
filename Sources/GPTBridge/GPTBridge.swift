@@ -38,9 +38,6 @@ import Foundation
 /// >
 /// > - NOTE: Both `functions` and `message` should never be populated
 public class GPTBridge {
-    enum StreamingError: Swift.Error {
-        case noStreamingManager
-    }
 
     public enum Error: Swift.Error {
         case nilRunResponse
