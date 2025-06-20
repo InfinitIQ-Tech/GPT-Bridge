@@ -73,6 +73,10 @@ struct StreamingRequestManager: RequestManageable {
 }
 
 public class AssistantFunctionResponse {
+    enum Error: Swift.Error {
+        case noStreamingRequestManager
+    }
+
     let runId: String
     let toolCalls: [ToolCall]
     let streamingRequestManager = StreamingRequestManager()
@@ -98,7 +102,7 @@ public class AssistantFunctionResponse {
         threadId: String,
         function: AssistantFunction,
         withMessage message: String = "200 OK"
-    ) async throws -> AsyncThrowingStream<RunStatusEvent, Error>{
+    ) async throws -> AsyncThrowingStream<RunStatusEvent, Swift.Error>{
         let responseMessage = """
                               Received arguments: \(function.arguments)
                               Message: \(message)
@@ -114,6 +118,7 @@ public class AssistantFunctionResponse {
         let outputs = [ToolCallOutput(toolCallId: id, output: responseMessage)]
 
         let request = ToolCallRequest(toolOutputs: outputs, stream: true)
+        guard let streamingRequestManager else { throw Error.noStreamingRequestManager }
 
         return try await streamingRequestManager.streamThreadRun(endpoint: .submitToolOutputs(threadId: threadId, runId: runId), method: .POST, requestData: request)
     }

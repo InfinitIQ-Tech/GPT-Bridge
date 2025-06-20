@@ -38,6 +38,10 @@ import Foundation
 /// >
 /// > - NOTE: Both `functions` and `message` should never be populated
 public class GPTBridge {
+    enum StreamingError: Swift.Error {
+        case noStreamingManager
+    }
+
     public enum Error: Swift.Error {
         case nilRunResponse
         case emptyMessageResponseDate
@@ -315,6 +319,8 @@ public class GPTBridge {
 
         let runRequest: CreateThreadRunRequest = CreateThreadRunRequest(assistantId: assistantId, stream: true)
 
+        guard let streamingRequestManager else { throw StreamingError.noStreamingManager }
+
         return try await streamingRequestManager.streamThreadRun(endpoint: .createRun(threadId: threadId), method: .POST, requestData: runRequest)
 
     }
@@ -340,6 +346,8 @@ public class GPTBridge {
     public static func createAndStreamThreadRun(text: String, assistantId: String) async throws -> AsyncThrowingStream<RunStatusEvent, Swift.Error> {
         let thread = Thread(messages: [ChatMessage(content: text)])
         let request = CreateAndRunThreadRequest(thread: thread, assistantId: assistantId)
+
+        guard let streamingRequestManager else { throw StreamingError.noStreamingManager }
         return try await streamingRequestManager.streamThreadRun(endpoint: .runs, method: .POST, requestData: request)
     }
 
@@ -363,6 +371,7 @@ public class GPTBridge {
     /// ```
     public static func createAndStreamThreadRun(assistantId: String, thread: Thread) async throws -> AsyncThrowingStream<RunStatusEvent, Swift.Error> {
         let request = CreateAndRunThreadRequest(thread: thread, assistantId: assistantId)
+        guard let streamingRequestManager else { throw StreamingError.noStreamingManager }
         return try await streamingRequestManager.streamThreadRun(endpoint: .runs, method: .POST, requestData: request)
     }
 
