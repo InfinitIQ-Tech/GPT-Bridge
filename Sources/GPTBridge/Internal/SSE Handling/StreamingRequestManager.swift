@@ -103,8 +103,14 @@ public class AssistantFunctionResponse {
                               Received arguments: \(function.arguments)
                               Message: \(message)
                               """
-        let toolCallfunctions = toolCalls.filter { $0.function == function }
-        let id = toolCallfunctions.first?.id ?? ""
+        guard let matchingToolCall = toolCalls.first(where: { $0.function == function }) else {
+            throw NSError(
+                domain: "AssistantFunctionResponse",
+                code: 1,
+                userInfo: [NSLocalizedDescriptionKey: "No matching tool call found for function"]
+            )
+        }
+        let id = matchingToolCall.id
         let outputs = [ToolCallOutput(toolCallId: id, output: responseMessage)]
 
         let request = ToolCallRequest(toolOutputs: outputs, stream: true)
