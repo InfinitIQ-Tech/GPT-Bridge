@@ -38,13 +38,17 @@ import Foundation
 /// >
 /// > - NOTE: Both `functions` and `message` should never be populated
 public class GPTBridge {
+
     public enum Error: Swift.Error {
         case nilRunResponse
         case emptyMessageResponseDate
     }
 
     private static let requestManager = RequestManager()
-    private static let streamingRequestManager = StreamingRequestManager()
+
+    private static func streamingRequestManager() throws -> StreamingRequestManager {
+        try StreamingRequestManager()
+    }
 
     public static func appLaunch(
         openAIAPIKey: String
@@ -314,8 +318,7 @@ public class GPTBridge {
         let _: AddMessageToThreadResponse = try await requestManager.makeRequest(endpoint: .addMessage(threadId: threadId), method: .POST, requestData: messageRequest)
 
         let runRequest: CreateThreadRunRequest = CreateThreadRunRequest(assistantId: assistantId, stream: true)
-
-        return try await streamingRequestManager.streamThreadRun(endpoint: .createRun(threadId: threadId), method: .POST, requestData: runRequest)
+        return try await streamingRequestManager().streamThreadRun(endpoint: .createRun(threadId: threadId), method: .POST, requestData: runRequest)
 
     }
 
@@ -340,7 +343,8 @@ public class GPTBridge {
     public static func createAndStreamThreadRun(text: String, assistantId: String) async throws -> AsyncThrowingStream<RunStatusEvent, Swift.Error> {
         let thread = Thread(messages: [ChatMessage(content: text)])
         let request = CreateAndRunThreadRequest(thread: thread, assistantId: assistantId)
-        return try await streamingRequestManager.streamThreadRun(endpoint: .runs, method: .POST, requestData: request)
+
+        return try await streamingRequestManager().streamThreadRun(endpoint: .runs, method: .POST, requestData: request)
     }
 
     /// Create a new thread with one or more messages and stream the first run
@@ -363,7 +367,7 @@ public class GPTBridge {
     /// ```
     public static func createAndStreamThreadRun(assistantId: String, thread: Thread) async throws -> AsyncThrowingStream<RunStatusEvent, Swift.Error> {
         let request = CreateAndRunThreadRequest(thread: thread, assistantId: assistantId)
-        return try await streamingRequestManager.streamThreadRun(endpoint: .runs, method: .POST, requestData: request)
+        return try await streamingRequestManager().streamThreadRun(endpoint: .runs, method: .POST, requestData: request)
     }
 
     /// Cancel the current run manually
