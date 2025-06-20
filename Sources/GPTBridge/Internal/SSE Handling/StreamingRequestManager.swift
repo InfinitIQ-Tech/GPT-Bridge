@@ -1,10 +1,9 @@
 //
-//  AsyncStreamManager.swift
+//  StreamingRequestManager.swift
 //  GPTBridge
 //
 //  Created by Kenneth Dubroff on 2/9/25.
 //
-
 import Foundation
 
 /// Represents the various run status events that can be streamed.
