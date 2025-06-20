@@ -39,9 +39,10 @@ GPT-Bridge currently provides:
 
 ## Integration Strategy
 
-### Phase 1: Foundation Layer (Weeks 1-3)
+### Phase 1: Foundation Layer (Effort: Medium-High)
 
 #### 1.1 Agent Model Enhancement
+**Effort Estimate**: Medium (3-5 developer days)
 - **Extend Current Models**: Add agent configuration structures
 - **New Core Types**:
   ```swift
@@ -57,58 +58,68 @@ GPT-Bridge currently provides:
   ```
 
 #### 1.2 Multi-Agent Runner
+**Effort Estimate**: High (8-12 developer days)
 - **New `AgentRunner` Class**: Central orchestration engine
 - **Agent Loop Implementation**: Swift equivalent of Python's run loop
 - **Context Management**: Maintain conversation state across agent handoffs
 
 #### 1.3 Enhanced Request Management
+**Effort Estimate**: Medium (4-6 developer days)
 - **Multi-Agent Endpoint Support**: Extend `AssistantEndpoint` for agent operations
 - **Conversation Context**: Track multi-agent conversation flows
 - **Agent State Management**: Handle active agent switching
 
-### Phase 2: Core Agentic Patterns (Weeks 4-6)
+### Phase 2: Core Agentic Patterns (Effort: High)
 
 #### 2.1 Handoffs Implementation
+**Effort Estimate**: High (7-10 developer days)
 - **Handoff Tool**: Specialized tool type for agent transfers
 - **Handoff Detection**: Parse and execute handoff requests
 - **Agent Resolution**: Dynamic agent lookup and activation
 
 #### 2.2 Guardrails System
+**Effort Estimate**: Medium-High (6-8 developer days)
 - **Input Guardrails**: Pre-processing validation
 - **Output Guardrails**: Post-processing validation
 - **Tripwire Mechanism**: Fast failure for invalid inputs
 - **Async Validation**: Parallel guardrail execution
 
 #### 2.3 Deterministic Workflows
+**Effort Estimate**: Medium (4-6 developer days)
 - **Sequential Agent Chains**: Pipeline-style agent execution
 - **Output Chaining**: Pass agent outputs as inputs to next agent
 - **Error Propagation**: Handle failures in agent chains
 
-### Phase 3: Advanced Patterns (Weeks 7-9)
+### Phase 3: Advanced Patterns (Effort: Very High)
 
 #### 3.1 Agents as Tools
+**Effort Estimate**: High (8-12 developer days)
 - **Agent Tool Wrapper**: Treat agents as callable tools
 - **Nested Agent Execution**: Agents calling other agents
 - **Result Integration**: Merge sub-agent results into main flow
 
 #### 3.2 Parallelization Support
+**Effort Estimate**: Very High (10-15 developer days)
 - **Concurrent Agent Execution**: Swift concurrency for parallel agents
 - **Result Aggregation**: Combine parallel agent outputs
 - **Load Balancing**: Distribute work across agent instances
 
 #### 3.3 LLM-as-a-Judge Pattern
+**Effort Estimate**: High (8-10 developer days)
 - **Self-Evaluation**: Agents that critique other agents' outputs
 - **Iterative Improvement**: Feedback loop implementation
 - **Quality Metrics**: Built-in evaluation criteria
 
-### Phase 4: Observability and Tooling (Weeks 10-12)
+### Phase 4: Observability and Tooling (Effort: Medium-High)
 
 #### 4.1 Tracing System
+**Effort Estimate**: High (7-10 developer days)
 - **Agent Execution Tracking**: Monitor agent workflow execution
 - **Performance Metrics**: Latency, cost, and success rate tracking
 - **Debug Visualization**: Flow diagrams for complex agent interactions
 
 #### 4.2 Configuration Management
+**Effort Estimate**: Medium (5-7 developer days)
 - **Agent Registry**: Central agent definition storage
 - **Dynamic Configuration**: Runtime agent behavior modification
 - **Workflow Templates**: Pre-built agent patterns
@@ -270,12 +281,36 @@ The internal implementation should be highly modular and extensible:
 2. **Breaking Changes**: Future OpenAI API changes affecting agents
    - **Mitigation**: Abstract implementation details behind stable interfaces
 
-## Timeline Summary
+## Implementation Effort Summary
 
-- **Weeks 1-3**: Foundation layer and core agent models
-- **Weeks 4-6**: Basic agentic patterns (handoffs, guardrails, deterministic flows)
-- **Weeks 7-9**: Advanced patterns (agents as tools, parallelization, LLM-as-judge)
-- **Weeks 10-12**: Observability, tooling, and polish
+### Total Estimated Effort: ~70-110 developer days
+
+**Phase-wise Breakdown:**
+- **Phase 1 - Foundation Layer**: 15-23 developer days (Medium-High effort)
+  - Critical foundation for all agent functionality
+  - Requires careful architectural decisions
+- **Phase 2 - Core Agentic Patterns**: 17-24 developer days (High effort)  
+  - Essential patterns for multi-agent workflows
+  - Complex interaction logic and state management
+- **Phase 3 - Advanced Patterns**: 26-37 developer days (Very High effort)
+  - Sophisticated features requiring deep domain expertise
+  - High complexity in concurrent execution and agent composition
+- **Phase 4 - Observability and Tooling**: 12-17 developer days (Medium-High effort)
+  - Developer productivity and debugging capabilities
+  - Important for production readiness
+
+**Effort Categories:**
+- **Low**: 1-2 developer days
+- **Medium**: 3-6 developer days  
+- **Medium-High**: 5-8 developer days
+- **High**: 7-12 developer days
+- **Very High**: 10+ developer days
+
+**Risk Factors Affecting Effort:**
+- Complexity of OpenAI API changes during development
+- Integration challenges with existing GPT-Bridge architecture
+- Performance optimization requirements
+- Comprehensive testing and documentation needs
 
 ## Conclusion
 
