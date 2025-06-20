@@ -2,7 +2,17 @@
 
 ## Executive Summary
 
-This document outlines a comprehensive plan to incorporate agentic workflows from the OpenAI Agents Python SDK into the GPT-Bridge Swift framework. The plan focuses on extending GPT-Bridge's current Assistant API capabilities to support multi-agent orchestration patterns while maintaining the framework's clean architecture and Swift API design guidelines.
+This document outlines a preliminary plan to incorporate agentic workflows from the OpenAI Agents Python SDK into the GPT-Bridge Swift framework. The plan focuses on extending GPT-Bridge's current Assistant API capabilities to support multi-agent orchestration patterns while maintaining the framework's clean architecture and Swift API design guidelines.
+
+## ⚠️ Important Disclaimer
+
+**This plan is based on general knowledge of agentic patterns and lacks direct analysis of the OpenAI Agents Python SDK source code.** Due to firewall restrictions preventing access to the SDK repository, this document serves as a foundational framework that requires validation and refinement once proper access to the SDK is established.
+
+**Next Steps Required:**
+1. Gain access to the OpenAI Agents Python SDK repository
+2. Conduct detailed analysis of the actual SDK architecture and patterns
+3. Update this plan with concrete references and accurate implementation details
+4. Validate proposed patterns against real SDK functionality
 
 ## Current State Analysis
 
@@ -20,16 +30,40 @@ GPT-Bridge currently provides:
 3. **Error Handling**: Structured error types and graceful failure management
 4. **Extensibility**: Plugin-style run handlers for different assistant behaviors
 
-## OpenAI Agents SDK Analysis
+## Research Methodology (To Be Completed)
 
-### Core Concepts from Python SDK
+**Required Analysis Once SDK Access Is Available:**
+
+### 1. SDK Architecture Analysis
+- **Core Components**: Identify main classes and interfaces
+- **Design Patterns**: Document architectural patterns used
+- **Dependencies**: Map external dependencies and requirements
+- **API Surface**: Catalog public methods and configuration options
+
+### 2. Implementation Pattern Analysis  
+- **Agent Definition**: How agents are configured and instantiated
+- **Workflow Orchestration**: How multi-agent flows are managed
+- **State Management**: How conversation context is handled
+- **Error Handling**: How failures are managed and propagated
+
+### 3. Feature Inventory
+- **Core Features**: Essential functionality for basic agent workflows
+- **Advanced Features**: Sophisticated patterns and optimizations
+- **Extension Points**: How the SDK can be customized or extended
+- **Performance Characteristics**: Latency, memory, and cost implications
+
+## Preliminary Analysis (Based on General Knowledge)
+
+**Note: The following analysis is based on general agentic patterns and requires validation against the actual SDK.**
+
+### Anticipated Core Concepts from Python SDK
 1. **Agents**: LLMs configured with instructions, tools, guardrails, and handoffs
 2. **Handoffs**: Specialized tool calls for transferring control between agents
 3. **Guardrails**: Input/output validation and safety checks
 4. **Runner/Agent Loop**: Orchestration engine that manages the multi-agent workflow
 5. **Tracing**: Built-in observability for debugging and optimization
 
-### Key Agentic Patterns Identified
+### Expected Agentic Patterns
 1. **Deterministic Flows**: Sequential agent execution with output chaining
 2. **Handoffs and Routing**: Dynamic agent selection based on context
 3. **Agents as Tools**: Treating other agents as callable functions
@@ -314,13 +348,19 @@ The internal implementation should be highly modular and extensible:
 
 ## Conclusion
 
-This plan provides a comprehensive roadmap for integrating OpenAI Agents SDK patterns into GPT-Bridge while maintaining the framework's core strengths. The phased approach allows for iterative development and validation, ensuring that each new capability builds upon previous successes.
+This preliminary plan provides a foundational framework for integrating OpenAI Agents SDK patterns into GPT-Bridge while maintaining the framework's core strengths. **However, this plan requires significant refinement and validation once direct access to the OpenAI Agents Python SDK is available.**
 
-The design emphasizes:
+**Critical Next Steps:**
+1. **SDK Access**: Resolve firewall restrictions to access the OpenAI Agents Python SDK repository
+2. **Detailed Analysis**: Conduct thorough examination of the actual SDK architecture and implementation
+3. **Plan Refinement**: Update this document with concrete references, accurate patterns, and validated effort estimates
+4. **Prototype Development**: Create small proof-of-concept implementations to validate approach
+
+The preliminary design emphasizes:
 - **Clean Architecture**: Maintaining SRP and DRY principles
 - **Swift-First Design**: Native patterns and type safety
 - **Backward Compatibility**: Protecting existing users
 - **Developer Experience**: Simple public APIs with powerful internal flexibility
 - **Extensibility**: Foundation for future agentic patterns
 
-By following this plan, GPT-Bridge will evolve from a single-assistant framework to a comprehensive multi-agent orchestration platform while preserving its reputation for clean, maintainable code.
+**This plan should be treated as a starting point for discussion rather than a definitive implementation guide until proper research is completed.**
