@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 60;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -11,8 +11,8 @@
 		AA770DA12BC113BD00D7FAE6 /* AssistantListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA770DA02BC113BD00D7FAE6 /* AssistantListView.swift */; };
 		AA770DA32BC113BE00D7FAE6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA770DA22BC113BE00D7FAE6 /* Assets.xcassets */; };
 		AA770DA72BC113BE00D7FAE6 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA770DA62BC113BE00D7FAE6 /* Preview Assets.xcassets */; };
-		AA770DB02BC1149500D7FAE6 /* GPTBridge in Frameworks */ = {isa = PBXBuildFile; productRef = AA770DAF2BC1149500D7FAE6 /* GPTBridge */; };
 		AABC12C02D5F084E00C74472 /* AssistantChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABC12BF2D5F084E00C74472 /* AssistantChatView.swift */; };
+		AAC83B642E0525F700C1A4A5 /* GPTBridge in Frameworks */ = {isa = PBXBuildFile; productRef = AAC83B632E0525F700C1A4A5 /* GPTBridge */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -22,8 +22,8 @@
 		AA770DA22BC113BE00D7FAE6 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		AA770DA42BC113BE00D7FAE6 /* My_GPT_Dashboard.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = My_GPT_Dashboard.entitlements; sourceTree = "<group>"; };
 		AA770DA62BC113BE00D7FAE6 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
-		AA770DAD2BC113F600D7FAE6 /* GPTBridge */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = GPTBridge; path = /Users/kennethdubroff/Development/Xcode_Development/InfinitIQTech/GPTBridge; sourceTree = "<absolute>"; };
 		AABC12BF2D5F084E00C74472 /* AssistantChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssistantChatView.swift; sourceTree = "<group>"; };
+		AAC83B5E2E05236200C1A4A5 /* GPTBridge */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = GPTBridge; path = ..; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -31,7 +31,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AA770DB02BC1149500D7FAE6 /* GPTBridge in Frameworks */,
+				AAC83B642E0525F700C1A4A5 /* GPTBridge in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -41,7 +41,12 @@
 		AA770D922BC113BD00D7FAE6 = {
 			isa = PBXGroup;
 			children = (
-				AA770D9D2BC113BD00D7FAE6 /* My GPT Dashboard */,
+				AA770D9E2BC113BD00D7FAE6 /* My_GPT_DashboardApp.swift */,
+				AABC12BF2D5F084E00C74472 /* AssistantChatView.swift */,
+				AA770DA02BC113BD00D7FAE6 /* AssistantListView.swift */,
+				AA770DA22BC113BE00D7FAE6 /* Assets.xcassets */,
+				AA770DA42BC113BE00D7FAE6 /* My_GPT_Dashboard.entitlements */,
+				AA770DA52BC113BE00D7FAE6 /* Preview Content */,
 				AA770D9C2BC113BD00D7FAE6 /* Products */,
 				AA770DAE2BC1149500D7FAE6 /* Frameworks */,
 			);
@@ -55,20 +60,6 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		AA770D9D2BC113BD00D7FAE6 /* My GPT Dashboard */ = {
-			isa = PBXGroup;
-			children = (
-				AA770DAD2BC113F600D7FAE6 /* GPTBridge */,
-				AA770D9E2BC113BD00D7FAE6 /* My_GPT_DashboardApp.swift */,
-				AABC12BF2D5F084E00C74472 /* AssistantChatView.swift */,
-				AA770DA02BC113BD00D7FAE6 /* AssistantListView.swift */,
-				AA770DA22BC113BE00D7FAE6 /* Assets.xcassets */,
-				AA770DA42BC113BE00D7FAE6 /* My_GPT_Dashboard.entitlements */,
-				AA770DA52BC113BE00D7FAE6 /* Preview Content */,
-			);
-			path = "My GPT Dashboard";
-			sourceTree = "<group>";
-		};
 		AA770DA52BC113BE00D7FAE6 /* Preview Content */ = {
 			isa = PBXGroup;
 			children = (
@@ -80,6 +71,7 @@
 		AA770DAE2BC1149500D7FAE6 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				AAC83B5E2E05236200C1A4A5 /* GPTBridge */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -102,6 +94,10 @@
 			name = "My GPT Dashboard";
 			packageProductDependencies = (
 				AA770DAF2BC1149500D7FAE6 /* GPTBridge */,
+				AAC7563E2E051BC000EE4861 /* GPTBridge */,
+				AAC756412E051C6400EE4861 /* GPTBridge */,
+				AACF407A2E051D320028B092 /* GPTBridge */,
+				AAC83B632E0525F700C1A4A5 /* GPTBridge */,
 			);
 			productName = "My GPT Dashboard";
 			productReference = AA770D9B2BC113BD00D7FAE6 /* My GPT Dashboard.app */;
@@ -131,6 +127,9 @@
 				Base,
 			);
 			mainGroup = AA770D922BC113BD00D7FAE6;
+			packageReferences = (
+				AAC83B622E0525F700C1A4A5 /* XCLocalSwiftPackageReference "../../GPTBridge" */,
+			);
 			productRefGroup = AA770D9C2BC113BD00D7FAE6 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -285,10 +284,10 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = "My GPT Dashboard/My_GPT_Dashboard.entitlements";
+				CODE_SIGN_ENTITLEMENTS = My_GPT_Dashboard.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"My GPT Dashboard/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"Preview Content\"";
 				DEVELOPMENT_TEAM = 34P4RF23ET;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -322,10 +321,10 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = "My GPT Dashboard/My_GPT_Dashboard.entitlements";
+				CODE_SIGN_ENTITLEMENTS = My_GPT_Dashboard.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"My GPT Dashboard/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"Preview Content\"";
 				DEVELOPMENT_TEAM = 34P4RF23ET;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -377,8 +376,31 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCLocalSwiftPackageReference section */
+		AAC83B622E0525F700C1A4A5 /* XCLocalSwiftPackageReference "../../GPTBridge" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../../GPTBridge;
+		};
+/* End XCLocalSwiftPackageReference section */
+
 /* Begin XCSwiftPackageProductDependency section */
 		AA770DAF2BC1149500D7FAE6 /* GPTBridge */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = GPTBridge;
+		};
+		AAC7563E2E051BC000EE4861 /* GPTBridge */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = GPTBridge;
+		};
+		AAC756412E051C6400EE4861 /* GPTBridge */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = GPTBridge;
+		};
+		AAC83B632E0525F700C1A4A5 /* GPTBridge */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = GPTBridge;
+		};
+		AACF407A2E051D320028B092 /* GPTBridge */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = GPTBridge;
 		};
