@@ -1,43 +1,27 @@
 //
-//  FunctionRunHandler.swift
-//  SlackMojiChef
+//  DallE3FunctionRunHandler.swift
+//  GPTBridge
 //
 //  Created by Kenneth Dubroff on 12/16/23.
 //
 
 import SwiftUI
+import Foundation
 
-protocol FunctionRunHandlable: RunHandler {
-    var requiredAction: RequiredAction? { get }
-
-    func parse() throws -> DallE3FunctionArguments
-}
-
-extension FunctionRunHandlable {
-    private var noActionRetrievedError: NSError {
-        NSError(domain: "noActionRetrievedError", code: 0, userInfo: nil)
-    }
-
-    func parse() throws  -> DallE3FunctionArguments {
-       guard let action = requiredAction,
-             action.submitToolOutputs.toolCalls.count > 0
-       else {
-           throw noActionRetrievedError
-       }
-       return action.submitToolOutputs.toolCalls[0].function.arguments // TODO: Generic arguments
-    }
-}
+// TODO: Move to example project with more simplistic example
 /// Assumes an assistant with a function that returns an image prompt
-class FunctionRunHandler: FunctionRunHandlable {
+class DallEFunctionRunHandler: FunctionRunHandlable {
     private enum Error: Swift.Error {
+        /// The prompt was nil
+        case badPrompt
         /// No required action in the run response
         case noRequiredActionRetrieved
     }
 
-
+    var functionParameters: [String : FunctionArgument]?
     var requiredAction: RequiredAction?
     // MARK: RunHandler implementation
-    var runThreadResponse: RunThreadResponse
+    var runThreadResponse: RunThreadResponse?
 
     /// The image name the assistant generated
     var imageName: String?
@@ -50,6 +34,7 @@ class FunctionRunHandler: FunctionRunHandlable {
     init(runThreadResponse: RunThreadResponse) {
         self.runThreadResponse = runThreadResponse
         self.requiredAction = runThreadResponse.requiredAction
+        self.functionParameters = try? parse()
     }
     
     /// Generate an image
@@ -62,10 +47,9 @@ class FunctionRunHandler: FunctionRunHandlable {
     /// 3. Set self.imageUrl
     /// - Throws: `noRequiredActionRetrieved` on nil `requiredAction` or requiredAction's `toolCalls` array being empty
     func handle() async throws {
-        let arguments = try parse()
-        let prompt = arguments.prompt
+        guard let prompt = functionParameters?["prompt"]?.asString else { throw Error.badPrompt }
         self.prompt = prompt
-        self.imageName = arguments.photoName
+        self.imageName = functionParameters?["photo_name"]?.asString
         let dallEHandler = DallEHandler(prompt: prompt)
         self.imageUrl = try await dallEHandler.generateImage()
     }
@@ -74,6 +58,7 @@ class FunctionRunHandler: FunctionRunHandlable {
 /// Generate images given a prompt
 class DallEHandler: EncodableRequest {
     enum Error: Swift.Error {
+        case noPrompt
         /// HTTPResponse error
         case badResponse
         /// no url existed in the payload from Dall*E
@@ -86,7 +71,7 @@ class DallEHandler: EncodableRequest {
     private let n = 1
     private var quality: String = "standard"
 
-    init(prompt: String) {
+    init(prompt: String)  {
         self.prompt = prompt
     }
     /// Generate an image with Dall*E 3

@@ -1,13 +1,13 @@
 //
-//  File.swift
-//  SlackMojiChef
+//  MessageData.swift
+//  GPTBridge
 //
 //  Created by Kenneth Dubroff on 12/9/23.
 //
 
 import Foundation
 /// The role of the message sender
-enum Role: String, EncodableRequest {
+public enum Role: String, EncodableRequest, Decodable {
     case user
     case assistant
 }
@@ -21,3 +21,46 @@ struct AddMessageToThreadRequest: EncodableRequest, OpenAIMessageable {
         self.content = content
     }
 }
+
+public struct ChatThread {
+    public let thread: Thread
+}
+
+public struct Thread: Codable {
+    public var messages: [ChatMessage] = []
+
+    public init(messages: [ChatMessage]) {
+        self.messages = messages
+    }
+}
+
+public struct ChatMessage: Codable, OpenAIMessageable, Identifiable {
+    public let id: String
+    public var content: String
+    public var role: Role
+
+    enum CodingKeys: String, CodingKey {
+        case content
+        case role
+    }
+
+    public init(from decoder: any Decoder) throws {
+        self.id = UUID().uuidString
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.content = try container.decode(String.self, forKey: .content)
+        self.role = try container.decode(Role.self, forKey: .role)
+    }
+
+    public func encode(to encoder: any Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(content, forKey: .content)
+        try container.encode(role, forKey: .role)
+    }
+
+    public init(content: String, role: Role = .user) {
+        self.id = UUID().uuidString
+        self.content = content
+        self.role = role
+    }
+}
+

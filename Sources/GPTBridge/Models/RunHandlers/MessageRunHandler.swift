@@ -1,6 +1,6 @@
 //
 //  MessageRunHandler.swift
-//  SlackMojiChef
+//  GPTBridge
 //
 //  Created by Kenneth Dubroff on 12/16/23.
 //
@@ -12,7 +12,7 @@ class MessageRunHandler: RunHandler {
         case noMessageId
     }
 
-    let runThreadResponse: RunThreadResponse
+    let runThreadResponse: RunThreadResponse?
 
     /// The Thread Run's ID
     private let runID: String
@@ -23,7 +23,7 @@ class MessageRunHandler: RunHandler {
     private var messageId: String?
     /// the AI's generated message
     /// - NOTE: this will be nil until `handle()` completes
-    var message: String?
+    public var message: String?
 
     init(runThreadResponse: RunThreadResponse, runID: String, threadID: String) {
         self.runThreadResponse = runThreadResponse
@@ -42,13 +42,13 @@ class MessageRunHandler: RunHandler {
     /// Get the message ID from the Thread Run's steps
     @discardableResult
     private func getMessageID() async throws -> String {
-        let messageId = try await GPTBridge().getMessageId(threadId: threadID, runId: runID)
+        let messageId = try await GPTBridge.getMessageId(threadId: threadID, runId: runID)
         self.messageId = messageId
         return messageId
     }
     /// Get the message text from the thread's `messages` array, given the message's ID
     private func getMessageText() async throws -> String {
         guard let messageID = messageId else { throw Error.noMessageId }
-        return try await GPTBridge().getMessageText(threadId: threadID, messageId: messageID)
+        return try await GPTBridge.getMessageText(threadId: threadID, messageId: messageID)
     }
 }

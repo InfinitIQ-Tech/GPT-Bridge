@@ -7,19 +7,26 @@
 
 import Foundation
 
-enum AppSecret: String {
-    case openAIAPIKey
-    case assistantKey
-    /// convenience method to get string value from .xcscheme
-    var bundleString: String {
-        let value = Bundle.main.infoDictionary?[rawValue] as? String
-        let errorStr = "The secret '\(rawValue)' is not defined.\nCreate a Secrets.xcconfig file in the bundle with \(rawValue)=<your_key_here>"
-        assert(value != nil && value != "", errorStr)
-        return value ?? errorStr
-    }
-}
+struct GPTSecretsConfig {
+    private static var _openAIAPIKey: String?
 
-struct Environment {
-    static let openAIAPIKey = AppSecret.openAIAPIKey.bundleString
-    static let assistantKey = AppSecret.assistantKey.bundleString
+    static var openAIAPIKey: String {
+        get {
+            assert(_openAIAPIKey != nil && !_openAIAPIKey!.isEmpty, "API Key must not be empty. Run `GPTBridge.applaunch` during your app's entry point")
+            return _openAIAPIKey ?? ""
+        }
+        set(newAPIKey) {
+            _openAIAPIKey = newAPIKey
+        }
+    }
+
+    static var orgId: String?
+
+    static func appLaunch(openAIAPIKey: String) {
+        self.openAIAPIKey = openAIAPIKey
+    }
+
+    static func setOrgId(orgId: String) {
+        self.orgId = orgId
+    }
 }

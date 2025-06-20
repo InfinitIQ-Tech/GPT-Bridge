@@ -15,6 +15,7 @@ Add any notes, gotchas, etc... delete if not used
 - [ ] Implemented a unit test
 - [ ] Modified a unit test
 - [ ] Didn't require unit testing
+  - Explain briefly:
   - Explain briefly
 
 **Optional**

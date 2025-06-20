@@ -1,16 +1,23 @@
 //
-//  Thread.swift
-//  SlackMojiChef
+//  ThreadData.swift
+//  GPTBridge
 //
 //  Created by Kenneth Dubroff on 12/9/23.
 //
 
 import Foundation
 
-/// JSON payload including the thread's ID
-struct CreateThreadResponse: DecodableResponse {
-    let id: String
+/// headers for creating threads
+typealias CreateThreadRequest = EmptyEncodableRequest
+
+struct CreateAndRunThreadRequest: EncodableRequest {
+    let stream: Bool = true
+    let thread: Thread
+    let assistantId: String
 }
 
-/// headers for creating threads
-struct CreateThreadRequest: EncodableRequest {}
+/// JSON payload including the thread's ID
+public struct CreateThreadResponse: DecodableResponse {
+    public let id: String
+}
+

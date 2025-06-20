@@ -1,11 +1,16 @@
 //
 //  AssistantMessageResponse.swift
-//  SlackMojiChef
+//  GPTBridge
 //
 //  Created by Kenneth Dubroff on 12/16/23.
 //
 
 import Foundation
+
+typealias CancelRunRequest = EmptyEncodableRequest
+typealias CancelRunResponse = EmptyDecodableResponse
+typealias MessageIdRequest = EmptyEncodableRequest
+typealias MessageTextRequest = EmptyEncodableRequest
 
 struct MessageContent: DecodableResponse {
     let content: [MessageTextObject]
@@ -24,7 +29,8 @@ struct MessageCreation: DecodableResponse {
 }
 
 struct StepDetails: DecodableResponse {
-    let messageCreation: MessageCreation
+    let messageCreation: MessageCreation?
+    let toolCalls: [ToolCall]?
 }
 
 struct GetMessageResponse: DecodableResponse {
@@ -32,13 +38,20 @@ struct GetMessageResponse: DecodableResponse {
 }
 
 struct MessageResponse: DecodableResponse {
-    let data: [GetMessageResponse]
+    var data: [GetMessageResponse]
 }
 
 /// headers for Messages
-struct AddMessageToThreadResponse: DecodableResponse {}
-struct CancelRunRequest: EncodableRequest {}
-struct CancelRunResponse: DecodableResponse {}
-struct MessageIdRequest: EncodableRequest {}
-struct MessageTextRequest: EncodableRequest {}
+struct AddMessageToThreadResponse: DecodableResponse {
+    let id: String
+    let content: [MessageTextObject]
+}
 
+// MARK: Streaming Response
+struct StreamingMessageResponse: DecodableResponse {
+    let role: Role
+    let assistantId: String
+    let threadId: String
+    let runId: String
+    let content: [MessageTextObject]
+}

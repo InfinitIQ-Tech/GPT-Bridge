@@ -1,6 +1,6 @@
 //
-//  Models.swift
-//  SlackMojiChef
+//  HTTPModels.swift
+//  GPTBridge
 //
 //  Created by Kenneth Dubroff on 12/5/23.
 //
@@ -15,14 +15,17 @@ enum HttpMethod: String {
 /// Endpoints for the OpenAI Assistants API
 enum AssistantEndpoint {
     case threads
+    case runs
     case addMessage(threadId: String)
     case createRun(threadId: String)
     case runThread(threadId: String, runId: String)
     case getMessageId(threadId: String, runId: String)
     case getMessageText(threadId: String, messageId: String)
     case cancelRun(threadId: String, runId: String)
+    case listAssistants(limit: Int?, order: PaginationOrder?, before: String?, after: String?)
+    case submitToolOutputs(threadId: String, runId: String)
 
-    var rawValue: String {
+    var path: String {
         switch self {
         case .threads:
             "/threads"
@@ -38,11 +41,39 @@ enum AssistantEndpoint {
             messageEndpoint(threadId: threadId) + "/\(messageId)"
         case .cancelRun(let threadId, let runId):
             runEndpoint(threadId: threadId, runId: runId) + "/cancel"
+        case .listAssistants:
+            "/assistants"
+        case .runs:
+            "/threads/runs"
+        case .submitToolOutputs(let threadId, let runId):
+            runEndpoint(threadId: threadId, runId: runId) + "/submit_tool_outputs"
+        }
+    }
+
+    var queryItems: [URLQueryItem]? {
+        switch self {
+        case .listAssistants(let limit, let order, let before, let after):
+            var queryItems: [URLQueryItem] = []
+            if let order = order {
+                queryItems.append(URLQueryItem(name: "order", value: order.rawValue))
+            }
+            if let limit = limit {
+                queryItems.append(URLQueryItem(name: "limit", value: String(limit)))
+            }
+            if let before = before {
+                queryItems.append(URLQueryItem(name: "before", value: before))
+            }
+            if let after = after {
+                queryItems.append(URLQueryItem(name: "after", value: after))
+            }
+            return queryItems
+        default:
+            return nil
         }
     }
 
     private func threadEndpoint(threadId: String) -> String {
-        Self.threads.rawValue + "/\(threadId)"
+        Self.threads.path + "/\(threadId)"
     }
 
     private func messageEndpoint(threadId: String) -> String {
@@ -71,20 +102,26 @@ struct OpenAIHeaders {
 
     private static var authorizationHeaders: HeaderGroup {
         HeaderGroup(headers: [
-            "Authorization": "Bearer \(Environment.openAIAPIKey)"
+            "Authorization": "Bearer \(GPTSecretsConfig.openAIAPIKey)"
         ])
     }
 
 
     private static var openAIBetaHeaders: HeaderGroup {
         HeaderGroup(headers: [
-            "OpenAI-Beta": "assistants=v1"
+            "OpenAI-Beta": "assistants=v2"
         ])
     }
-    
+
     /// Standard headers for requests including a JSON payload/body
     static var jsonPayloadHeaders: [String: String] {
-        let headerGroups = [contentTypeHeaders, authorizationHeaders, openAIBetaHeaders]
+        var headerGroups = [contentTypeHeaders, authorizationHeaders, openAIBetaHeaders]
+
+        if let orgId = GPTSecretsConfig.orgId {
+            headerGroups.append(HeaderGroup(headers: [
+                "org_id": orgId
+            ]))
+        }
 
         let allHttpHeaders = headerGroups.reduce(into: [:]) { result, headerGroup in
             result.merge(headerGroup.headers) { (_, new) in new }
@@ -119,7 +156,6 @@ protocol EncodableRequest: Encodable {
 }
 
 extension EncodableRequest {
-
     /// Headers describing content type and including Bearer auth
     /// - NOTE: computed in order to prevent encoding parameter
     var jsonPayloadHeaders: [String: String] {
@@ -131,4 +167,10 @@ extension EncodableRequest {
         encoder.keyEncodingStrategy = .convertToSnakeCase
         return try encoder.encode(self)
     }
+}
+
+struct EmptyDecodableResponse: DecodableResponse {}
+struct EmptyEncodableRequest: EncodableRequest {}
+struct EmptyStreamingEncodableRequest: EncodableRequest {
+    let stream: Bool
 }

@@ -1,16 +1,40 @@
 //
 //  RequestManager.swift
-//  SlackMojiChef
+//  GPTBridge
 //
 //  Created by Kenneth Dubroff on 12/7/23.
 //
 
 import Foundation
 
-struct RequestManager {
-    private let baseURL: URL
+protocol RequestManageable {
+    var baseURL: URL { get }
+    func makeURL(fromEndpoint endpoint: AssistantEndpoint) -> URL
+}
 
-    init(baseURL: URL = URL(string: "https://api.openai.com/v1")!) {
+extension RequestManageable {
+    static var baseURLString: String { "https://api.openai.com/v1" }
+
+    func makeURL(fromEndpoint endpoint: AssistantEndpoint) -> URL {
+        var endpointURL = baseURL.appendingPathComponent(endpoint.path)
+
+        if let queryItems = endpoint.queryItems,
+           !queryItems.isEmpty {
+            var components = URLComponents(url: endpointURL, resolvingAgainstBaseURL: false)
+            components?.queryItems = queryItems
+            if let url = components?.url {
+                endpointURL = url
+            }
+        }
+
+        return endpointURL
+    }
+}
+
+struct RequestManager: RequestManageable {
+    let baseURL: URL
+
+    init(baseURL: URL = URL(string: Self.baseURLString)!) {
         self.baseURL = baseURL
     }
 
@@ -19,7 +43,7 @@ struct RequestManager {
         method: HttpMethod,
         requestData: U?
     ) async throws -> T {
-        let endpointURL = baseURL.appendingPathComponent(endpoint.rawValue)
+        let endpointURL = makeURL(fromEndpoint: endpoint)
 
         var request = URLRequest(url: endpointURL)
         request.httpMethod = method.rawValue
@@ -44,7 +68,7 @@ struct RequestManager {
                         let responseObject = try T.createInstanceFrom(data: data)
                         return responseObject
                     } catch {
-                        print("Error decoding data: \(String(data: data, encoding: .utf8))")
+                        print("Error decoding data: \(String(data: data, encoding: .utf8) ?? "Data couldn't be decoded to utf-8 String")")
                         throw error
                     }
                 } else if httpResponse.statusCode == 400 {
@@ -67,7 +91,7 @@ struct RequestManager {
                         throw RequestError.invalidResponse(400)
                     }
                 } else {
-                    print("endpoint: \(endpoint.rawValue), status code: \(httpResponse.statusCode)")
+                    print("endpoint: \(endpoint.path), status code: \(httpResponse.statusCode)")
                     print(String(data: data, encoding: .utf8) ?? "No Response Data")
                     throw RequestError.invalidResponse(httpResponse.statusCode)
                 }
@@ -90,9 +114,12 @@ struct OpenAIJSONErrorWrapper: Decodable {
     let error: OpenAIJSONError
 }
 
-struct OpenAIJSONError: Decodable {
-    let message: String
-    let type: String?
-    let param: String?
-    let code: Int?
+public struct OpenAIJSONError: Decodable, Identifiable {
+    public var id: String {
+        UUID().uuidString
+    }
+    public let message: String
+    public let type: String?
+    public let param: String?
+    public let code: Int?
 }
