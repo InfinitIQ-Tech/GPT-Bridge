@@ -12,7 +12,6 @@
 		AA770DA32BC113BE00D7FAE6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA770DA22BC113BE00D7FAE6 /* Assets.xcassets */; };
 		AA770DA72BC113BE00D7FAE6 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA770DA62BC113BE00D7FAE6 /* Preview Assets.xcassets */; };
 		AABC12C02D5F084E00C74472 /* AssistantChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABC12BF2D5F084E00C74472 /* AssistantChatView.swift */; };
-		AAC83B642E0525F700C1A4A5 /* GPTBridge in Frameworks */ = {isa = PBXBuildFile; productRef = AAC83B632E0525F700C1A4A5 /* GPTBridge */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -31,7 +30,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AAC83B642E0525F700C1A4A5 /* GPTBridge in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
