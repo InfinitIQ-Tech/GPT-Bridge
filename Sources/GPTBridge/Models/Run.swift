@@ -37,7 +37,11 @@ public struct FunctionArgument: Codable {
     let value: Any
 
     public init<T: Codable>(_ value: T?) {
-        self.value = value ?? ()
+        if let value {
+            self.value = value
+        } else {
+            self.value = Optional<T>.none as Any
+        }
     }
 
     public init(from decoder: Decoder) throws {
