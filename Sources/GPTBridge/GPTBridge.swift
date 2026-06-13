@@ -54,6 +54,93 @@ public class GPTBridge {
         )
     }
 
+    /// Create a Chat Completion from the provided messages.
+    public static func createChatCompletion(
+        request: ChatCompletionRequest
+    ) async throws -> ChatCompletionResponse {
+        try await requestManager
+            .makeRequest(
+                endpoint: CompletionsEndpoint.chatCompletions,
+                method: .POST,
+                requestData: request
+            )
+    }
+
+    /// Create a Chat Completion from the provided messages.
+    public static func createChatCompletion(
+        model: String,
+        messages: [ChatCompletionMessage],
+        tools: [ChatCompletionTool]? = nil,
+        toolChoice: ChatCompletionToolChoice? = nil,
+        temperature: Double? = nil,
+        maxCompletionTokens: Int? = nil
+    ) async throws -> ChatCompletionResponse {
+        let request = ChatCompletionRequest(
+            model: model,
+            messages: messages,
+            tools: tools,
+            toolChoice: toolChoice,
+            temperature: temperature,
+            maxCompletionTokens: maxCompletionTokens
+        )
+        return try await createChatCompletion(request: request)
+    }
+
+    /// Create a Chat Completion and return the same `RunStepResult` abstraction used by the deprecated Assistants API helpers.
+    public static func createChatCompletionResult(
+        model: String,
+        messages: [ChatCompletionMessage],
+        tools: [ChatCompletionTool]? = nil,
+        toolChoice: ChatCompletionToolChoice? = nil,
+        temperature: Double? = nil,
+        maxCompletionTokens: Int? = nil
+    ) async throws -> RunStepResult {
+        let response = try await createChatCompletion(
+            model: model,
+            messages: messages,
+            tools: tools,
+            toolChoice: toolChoice,
+            temperature: temperature,
+            maxCompletionTokens: maxCompletionTokens
+        )
+        return response.runStepResult
+    }
+
+    /// Stream Chat Completion deltas from the provided messages.
+    public static func streamChatCompletion(
+        request: ChatCompletionRequest,
+        timeout: TimeInterval = 30.0
+    ) async throws -> AsyncThrowingStream<ChatCompletionStreamEvent, Swift.Error> {
+        try await streamingRequestManager.streamChatCompletion(
+            endpoint: CompletionsEndpoint.chatCompletions,
+            method: .POST,
+            timeout: timeout,
+            requestData: request.withStream(true)
+        )
+    }
+
+    /// Stream Chat Completion deltas from the provided messages.
+    public static func streamChatCompletion(
+        model: String,
+        messages: [ChatCompletionMessage],
+        tools: [ChatCompletionTool]? = nil,
+        toolChoice: ChatCompletionToolChoice? = nil,
+        temperature: Double? = nil,
+        maxCompletionTokens: Int? = nil,
+        timeout: TimeInterval = 30.0
+    ) async throws -> AsyncThrowingStream<ChatCompletionStreamEvent, Swift.Error> {
+        let request = ChatCompletionRequest(
+            model: model,
+            messages: messages,
+            tools: tools,
+            toolChoice: toolChoice,
+            temperature: temperature,
+            maxCompletionTokens: maxCompletionTokens,
+            stream: true
+        )
+        return try await streamChatCompletion(request: request, timeout: timeout)
+    }
+
     /// List assistants in orgId
     /// - NOTE: If no orgId is provided, your OpenAI account's default org_id is used
     /// - NOTE: Leave PaginatedRequestParameters as nil to get all assistants immediately
@@ -82,6 +169,7 @@ public class GPTBridge {
     ///       }
     ///     }
     /// ```
+    @available(*, deprecated, message: "Use Chat Completions methods such as createChatCompletion or streamChatCompletion instead.")
     public static func listAssistants(
         orgId: String? = nil,
         paginatedBy: PaginatedRequestParameters? = nil
@@ -96,7 +184,7 @@ public class GPTBridge {
 
         return try await requestManager
             .makeRequest(
-                endpoint: .listAssistants(limit: paginatedBy?.limit, order: paginatedBy?.order, before: paginatedBy?.startBefore, after: paginatedBy?.startAfter),
+                endpoint: AssistantEndpoint.listAssistants(limit: paginatedBy?.limit, order: paginatedBy?.order, before: paginatedBy?.startBefore, after: paginatedBy?.startAfter),
                 method: .GET,
                 requestData: listAssistantRequest
             )
@@ -104,11 +192,12 @@ public class GPTBridge {
 
     /// Create a thread to converse with the assistant
     /// - Returns: The thread's ID
+    @available(*, deprecated, message: "Use ChatCompletionMessage arrays with createChatCompletion instead.")
     public static func createThread() async throws -> String {
         let createThreadRequestData: CreateThreadRequest? = CreateThreadRequest()
         let response: CreateThreadResponse = try await requestManager
             .makeRequest(
-                endpoint: .threads,
+                endpoint: AssistantEndpoint.threads,
                 method: .POST,
                 requestData: createThreadRequestData
             )
@@ -116,6 +205,7 @@ public class GPTBridge {
     }
 
     /// Add a message to a thread
+    @available(*, deprecated, message: "Use ChatCompletionMessage arrays with createChatCompletion instead.")
     public static func addMessageToThread(
         message: String,
         threadId: String,
@@ -128,7 +218,7 @@ public class GPTBridge {
         do {
             let _: AddMessageToThreadResponse? = try await requestManager
                 .makeRequest(
-                    endpoint: .addMessage(
+                    endpoint: AssistantEndpoint.addMessage(
                         threadId: threadId
                     ),
                     method: .POST,
@@ -158,6 +248,7 @@ public class GPTBridge {
     /// Create a run in a thread
     /// - Parameter threadId: The threadId of the run to create
     /// - Returns: The created Run's ID
+    @available(*, deprecated, message: "Use createChatCompletionResult or createChatCompletion instead.")
     public static func createRun(
         threadId: String,
         assistantId: String
@@ -166,7 +257,7 @@ public class GPTBridge {
         let runRequestData: CreateThreadRunRequest = CreateThreadRunRequest(assistantId: assistantId)
         let runResponse: RunThreadResponse = try await requestManager
             .makeRequest(
-                endpoint: .createRun(
+                endpoint: AssistantEndpoint.createRun(
                     threadId: threadId
                 ),
                 method: .POST,
@@ -190,6 +281,7 @@ public class GPTBridge {
     /// - Returns: An instance of a `RunStepResult` implementation based on the final status of the run. If the assistant runs functions, their propertries will be available in the `functions` property of the `RunStepResult`. Otherwise, if the assistant sends a message back or there's an error, the `message` propperty will contain a String
     ///
     /// - Note: This function uses `Task.sleep(nanoseconds: 500_000_000)` to introduce a delay of 0.5 seconds between each poll, to prevent overwhelming the server with requests.
+    @available(*, deprecated, message: "Use createChatCompletionResult or createChatCompletion instead.")
     public static func pollRunStatus(
         threadId: String,
         runId: String
@@ -212,7 +304,7 @@ public class GPTBridge {
         ) {
             let runResponse: RunThreadResponse = try await requestManager
                 .makeRequest(
-                    endpoint: .runThread(
+                    endpoint: AssistantEndpoint.runThread(
                         threadId: threadId,
                         runId: runId
                     ),
@@ -309,13 +401,14 @@ public class GPTBridge {
     ///       break
     ///   }
     /// ```
+    @available(*, deprecated, message: "Use streamChatCompletion instead.")
     public static func addMessageAndStreamThreadRun(text: String, threadId: String, assistantId: String) async throws -> AsyncThrowingStream<RunStatusEvent, Swift.Error> {
         let messageRequest = AddMessageToThreadRequest(content: text)
-        let _: AddMessageToThreadResponse = try await requestManager.makeRequest(endpoint: .addMessage(threadId: threadId), method: .POST, requestData: messageRequest)
+        let _: AddMessageToThreadResponse = try await requestManager.makeRequest(endpoint: AssistantEndpoint.addMessage(threadId: threadId), method: .POST, requestData: messageRequest)
 
         let runRequest: CreateThreadRunRequest = CreateThreadRunRequest(assistantId: assistantId, stream: true)
 
-        return try await streamingRequestManager.streamThreadRun(endpoint: .createRun(threadId: threadId), method: .POST, requestData: runRequest)
+        return try await streamingRequestManager.streamThreadRun(endpoint: AssistantEndpoint.createRun(threadId: threadId), method: .POST, requestData: runRequest)
 
     }
 
@@ -337,10 +430,11 @@ public class GPTBridge {
     ///        break
     ///    }
     /// ```
+    @available(*, deprecated, message: "Use streamChatCompletion instead.")
     public static func createAndStreamThreadRun(text: String, assistantId: String) async throws -> AsyncThrowingStream<RunStatusEvent, Swift.Error> {
         let thread = Thread(messages: [ChatMessage(content: text)])
         let request = CreateAndRunThreadRequest(thread: thread, assistantId: assistantId)
-        return try await streamingRequestManager.streamThreadRun(endpoint: .runs, method: .POST, requestData: request)
+        return try await streamingRequestManager.streamThreadRun(endpoint: AssistantEndpoint.runs, method: .POST, requestData: request)
     }
 
     /// Create a new thread with one or more messages and stream the first run
@@ -361,13 +455,15 @@ public class GPTBridge {
     ///        break
     ///    }
     /// ```
+    @available(*, deprecated, message: "Use streamChatCompletion instead.")
     public static func createAndStreamThreadRun(assistantId: String, thread: Thread) async throws -> AsyncThrowingStream<RunStatusEvent, Swift.Error> {
         let request = CreateAndRunThreadRequest(thread: thread, assistantId: assistantId)
-        return try await streamingRequestManager.streamThreadRun(endpoint: .runs, method: .POST, requestData: request)
+        return try await streamingRequestManager.streamThreadRun(endpoint: AssistantEndpoint.runs, method: .POST, requestData: request)
     }
 
     /// Cancel the current run manually
     /// This is useful for reducing processing time in the OpenAI API when the assistant doesn't need to know the results of a function call
+    @available(*, deprecated, message: "Chat Completions do not create assistant runs; cancel the consuming Task for streamed completions.")
     public static func cancelRun(
         threadId: String,
         runId: String
@@ -375,7 +471,7 @@ public class GPTBridge {
         let cancelRunRequest = CancelRunRequest()
         let _: CancelRunResponse? = try await requestManager
             .makeRequest(
-                endpoint: .cancelRun(
+                endpoint: AssistantEndpoint.cancelRun(
                     threadId: threadId,
                     runId: runId
                 ),
@@ -399,6 +495,7 @@ public class GPTBridge {
     /// - Returns: An instance of `RunStepResult` representing the next step in the run. This could be a `FunctionRunStepResult` if the assistant requires another tool call, or a `MessageRunStepResult` if the assistant has generated a final message.
     ///
     /// - Throws: An error if there was a problem submitting the tool outputs or polling for the next step in the run.
+    @available(*, deprecated, message: "Use ChatCompletionMessage.toolOutput(toolCallId:output:) and send the updated messages to createChatCompletion.")
     public static func submitToolOutputs(
         threadId: String,
         runId: String,

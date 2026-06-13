@@ -55,7 +55,7 @@ struct StreamingRequestManager: StreamingRequestManageable {
     }
 
     func streamThreadRun<U>(
-        endpoint: AssistantEndpoint,
+        endpoint: any OpenAIEndpoint,
         method: HttpMethod,
         timeout: TimeInterval = 30.0,
         requestData: U?
@@ -64,7 +64,7 @@ struct StreamingRequestManager: StreamingRequestManageable {
 
         var request = URLRequest(url: makeURL(fromEndpoint: endpoint))
         request.httpMethod = method.rawValue
-        request.allHTTPHeaderFields = requestData?.jsonPayloadHeaders
+        request.allHTTPHeaderFields = OpenAIHeaders.jsonPayloadHeaders(for: endpoint, requestHeaders: requestData?.jsonPayloadHeaders)
         request.setValue("text/event-stream", forHTTPHeaderField: "Accept")
 
         if let requestData = requestData, method != .GET {
@@ -73,5 +73,25 @@ struct StreamingRequestManager: StreamingRequestManageable {
 
         // Simply call your SSEStreamer
         return ThreadRunStreamHandler().streamRunStatusEvents(with: request, inactivityTimeout: timeout)
+    }
+
+    func streamChatCompletion<U>(
+        endpoint: any OpenAIEndpoint,
+        method: HttpMethod,
+        timeout: TimeInterval = 30.0,
+        requestData: U?
+    ) async throws -> AsyncThrowingStream<ChatCompletionStreamEvent, any Error>
+    where U : EncodableRequest {
+
+        var request = URLRequest(url: makeURL(fromEndpoint: endpoint))
+        request.httpMethod = method.rawValue
+        request.allHTTPHeaderFields = OpenAIHeaders.jsonPayloadHeaders(for: endpoint, requestHeaders: requestData?.jsonPayloadHeaders)
+        request.setValue("text/event-stream", forHTTPHeaderField: "Accept")
+
+        if let requestData = requestData, method != .GET {
+            request.httpBody = try requestData.encodeInstance()
+        }
+
+        return ChatCompletionStreamHandler().streamChatCompletionEvents(with: request, inactivityTimeout: timeout)
     }
 }
