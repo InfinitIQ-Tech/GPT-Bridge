@@ -138,7 +138,7 @@ struct ToolCall: DecodableResponse {
     let function: AssistantFunction
 }
 
-public struct AssistantFunction: Codable, DecodableResponse {
+public struct AssistantFunction: Codable, DecodableResponse, Equatable {
     public let name: String
     public let arguments: [String: FunctionArgument]
 
@@ -178,5 +178,9 @@ public struct AssistantFunction: Codable, DecodableResponse {
             throw EncodingError.invalidValue(arguments, EncodingError.Context(codingPath: [CodingKeys.arguments], debugDescription: "Cannot encode arguments as UTF-8 JSON"))
         }
         try container.encode(argumentsString, forKey: .arguments)
+    }
+
+    public static func == (lhs: AssistantFunction, rhs: AssistantFunction) -> Bool {
+        lhs.name == rhs.name
     }
 }
