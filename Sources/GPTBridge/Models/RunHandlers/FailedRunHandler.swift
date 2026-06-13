@@ -28,7 +28,7 @@ class FailedRunHandler: RunHandler {
     /// The Thread Run's status
     /// Used to determine if run was cancelled or failed
     var status: RunThreadResponse.Status
-    var runThreadResponse: RunThreadResponse
+    var runThreadResponse: RunThreadResponse?
 
     /// Swift Error4 describing what happened
     /// will be `runThreadResponse.lastError` if non-nil

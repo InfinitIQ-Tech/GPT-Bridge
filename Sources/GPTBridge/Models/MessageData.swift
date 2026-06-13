@@ -8,8 +8,12 @@
 import Foundation
 /// The role of the message sender
 public enum Role: String, EncodableRequest, Decodable {
+    case developer
+    case system
     case user
     case assistant
+    case tool
+    case function
 }
 /// Headers and JSON body for adding a message to a thread
 struct AddMessageToThreadRequest: EncodableRequest, OpenAIMessageable {
@@ -63,4 +67,3 @@ public struct ChatMessage: Codable, OpenAIMessageable, Identifiable {
         self.role = role
     }
 }
-

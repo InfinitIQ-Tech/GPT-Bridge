@@ -21,7 +21,7 @@ class ListAssistantsTests: XCTestCase {
         """
         {
           "id": "\(testAssistant1.id)",
-          "name": "\(testAssistant1.name)",
+          "name": "\(testAssistant1.name!)",
           "description": null,
           "model": "\(testAssistant1.model)",
           "instructions": "\(testAssistant1.instructions!)"
@@ -112,7 +112,7 @@ class ListAssistantsTests: XCTestCase {
         let decodedResponse = try toInstance(from: listAssistantsReponseJSONString, to: ListAssistantsResponse.self)
         XCTAssertEqual(decodedResponse.firstId, testResponse.firstId)
         XCTAssertEqual(decodedResponse.lastId, testResponse.lastId)
-        XCTAssertFalse(decodedResponse.hasMore)
+        XCTAssertEqual(decodedResponse.hasMore, false)
         XCTAssertEqual(decodedResponse.data[0], testAssistant1)
         XCTAssertEqual(decodedResponse.data[1], testAssistant2)
     }

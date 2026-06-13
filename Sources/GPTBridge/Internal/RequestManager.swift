@@ -9,13 +9,13 @@ import Foundation
 
 protocol RequestManageable {
     var baseURL: URL { get }
-    func makeURL(fromEndpoint endpoint: AssistantEndpoint) -> URL
+    func makeURL(fromEndpoint endpoint: any OpenAIEndpoint) -> URL
 }
 
 extension RequestManageable {
     static var baseURLString: String { "https://api.openai.com/v1" }
 
-    func makeURL(fromEndpoint endpoint: AssistantEndpoint) -> URL {
+    func makeURL(fromEndpoint endpoint: any OpenAIEndpoint) -> URL {
         var endpointURL = baseURL.appendingPathComponent(endpoint.path)
 
         if let queryItems = endpoint.queryItems,
@@ -39,7 +39,7 @@ struct RequestManager: RequestManageable {
     }
 
     func makeRequest<T: DecodableResponse, U: EncodableRequest>(
-        endpoint: AssistantEndpoint,
+        endpoint: any OpenAIEndpoint,
         method: HttpMethod,
         requestData: U?
     ) async throws -> T {
@@ -47,7 +47,7 @@ struct RequestManager: RequestManageable {
 
         var request = URLRequest(url: endpointURL)
         request.httpMethod = method.rawValue
-        request.allHTTPHeaderFields = requestData?.jsonPayloadHeaders
+        request.allHTTPHeaderFields = OpenAIHeaders.jsonPayloadHeaders(for: endpoint, requestHeaders: requestData?.jsonPayloadHeaders)
 
         // Set the request body if needed
         if let requestData = requestData,

@@ -14,12 +14,22 @@ struct AssistantListView: View {
 
     var body: some View {
         VStack {
-            List(assistants, id: \.id) { assistant in
-                NavigationLink(destination: AssistantChatView(viewModel: AssistantChatViewModel(activeAssistant: assistant))) {
-                    Text(assistant.name ?? "Name Not Defined")
+            if assistants.isEmpty {
+                Text(
+"""
+No assistants found for the org associated with this API key. \
+Create an API key for an org with assistants or create an assistant for this account at [OpenAI settings](https://platform.openai.com/settings/organization/api-keys)
+""")
+                    .font(.largeTitle)
+                    .padding()
+            } else {
+                List(assistants, id: \.id) { assistant in
+                    NavigationLink(destination: AssistantChatView(viewModel: AssistantChatViewModel(activeAssistant: assistant))) {
+                        Text(assistant.name ?? "Name Not Defined")
+                    }
                 }
+                .listStyle(SidebarListStyle())
             }
-            .listStyle(SidebarListStyle())
         }
         .padding()
         .task {

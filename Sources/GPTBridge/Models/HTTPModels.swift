@@ -12,8 +12,24 @@ enum HttpMethod: String {
     case GET
 }
 
+protocol OpenAIEndpoint {
+    var path: String { get }
+    var queryItems: [URLQueryItem]? { get }
+    var additionalHeaders: [String: String] { get }
+}
+
+extension OpenAIEndpoint {
+    var queryItems: [URLQueryItem]? {
+        nil
+    }
+
+    var additionalHeaders: [String: String] {
+        [:]
+    }
+}
+
 /// Endpoints for the OpenAI Assistants API
-enum AssistantEndpoint {
+enum AssistantEndpoint: OpenAIEndpoint {
     case threads
     case runs
     case addMessage(threadId: String)
@@ -48,6 +64,10 @@ enum AssistantEndpoint {
         case .submitToolOutputs(let threadId, let runId):
             runEndpoint(threadId: threadId, runId: runId) + "/submit_tool_outputs"
         }
+    }
+
+    var additionalHeaders: [String: String] {
+        OpenAIHeaders.assistantsBetaHeaders
     }
 
     var queryItems: [URLQueryItem]? {
@@ -86,6 +106,18 @@ enum AssistantEndpoint {
     }
 }
 
+/// Endpoints for the OpenAI Chat Completions API
+enum CompletionsEndpoint: OpenAIEndpoint {
+    case chatCompletions
+
+    var path: String {
+        switch self {
+        case .chatCompletions:
+            "/chat/completions"
+        }
+    }
+}
+
 /// Standard headers for the OpenAI Assistants API
 struct OpenAIHeaders {
     typealias HttpHeaders = [String: String]
@@ -113,9 +145,13 @@ struct OpenAIHeaders {
         ])
     }
 
+    static var assistantsBetaHeaders: [String: String] {
+        openAIBetaHeaders.headers
+    }
+
     /// Standard headers for requests including a JSON payload/body
     static var jsonPayloadHeaders: [String: String] {
-        var headerGroups = [contentTypeHeaders, authorizationHeaders, openAIBetaHeaders]
+        var headerGroups = [contentTypeHeaders, authorizationHeaders]
 
         if let orgId = GPTSecretsConfig.orgId {
             headerGroups.append(HeaderGroup(headers: [
@@ -128,6 +164,12 @@ struct OpenAIHeaders {
         }
 
         return allHttpHeaders
+    }
+
+    static func jsonPayloadHeaders(for endpoint: any OpenAIEndpoint, requestHeaders: [String: String]?) -> [String: String] {
+        var headers = requestHeaders ?? jsonPayloadHeaders
+        headers.merge(endpoint.additionalHeaders) { _, new in new }
+        return headers
     }
 
 }
