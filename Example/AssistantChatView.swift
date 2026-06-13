@@ -48,7 +48,7 @@ class AssistantChatViewModel: ObservableObject {
                 resetStream(usingChatMessage: message)
             case .runRequiresAction(let response):
                 let functions = response.assistantFunctions
-                
+
                 for (toolCallId, function) in functions {
                     for argument in function.arguments {
                         let argumentKey = argument.key
@@ -122,7 +122,7 @@ class AssistantChatViewModel: ObservableObject {
             }
         }
     }
-    
+
     /// Add a message to an existing thread and stream the run
     /// - Parameters:
     ///   - assistantId: If nil, the activeAssistantId (if set) will be used
@@ -158,7 +158,7 @@ class AssistantChatViewModel: ObservableObject {
         let thread = try await GPTBridge.createThread()
         self.threadId = thread
     }
-    
+
     @MainActor
     func addMessageToThread(withContent text: String) async throws {
         // TODO: Implement non-streaming method

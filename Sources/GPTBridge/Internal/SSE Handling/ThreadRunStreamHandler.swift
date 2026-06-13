@@ -43,20 +43,27 @@ struct ThreadRunStreamHandler: SSEStreamHandlable {
         streamEvents(with: request, inactivityTimeout: inactivityTimeout)
     }
 
-    func parseEvent(eventType: String, eventData: String) -> RunStatusEvent? {
-           let trimmedEventType = eventType.trimmingCharacters(in: .whitespacesAndNewlines)
-           let data = Data(eventData.utf8)
+    func parseEvents(eventType: String, eventData: String) -> [RunStatusEvent] {
+        guard let event = parseEvent(eventType: eventType, eventData: eventData) else {
+            return []
+        }
+        return [event]
+    }
 
-           switch trimmedEventType {
-           case RunStatusEvent.threadCreatedKey:
-               if let threadResp = try? CreateThreadResponse.createInstanceFrom(data: data) {
-                   return .threadCreated(threadResp.id)
-               }
+    private func parseEvent(eventType: String, eventData: String) -> RunStatusEvent? {
+        let trimmedEventType = eventType.trimmingCharacters(in: .whitespacesAndNewlines)
+        let data = Data(eventData.utf8)
 
-           case RunStatusEvent.runStepCreatedKey:
-               if let step = try? MessageRunStepResult.createInstanceFrom(data: data) {
-                   return .runStepCreated(step)
-               }
+        switch trimmedEventType {
+        case RunStatusEvent.threadCreatedKey:
+            if let threadResp = try? CreateThreadResponse.createInstanceFrom(data: data) {
+                return .threadCreated(threadResp.id)
+            }
+
+        case RunStatusEvent.runStepCreatedKey:
+            if let step = try? MessageRunStepResult.createInstanceFrom(data: data) {
+                return .runStepCreated(step)
+            }
 
         case RunStatusEvent.runStepInProgressKey:
             if let step = try? MessageRunStepResult.createInstanceFrom(data: data) {
@@ -124,14 +131,14 @@ struct ThreadRunStreamHandler: SSEStreamHandlable {
             }
 
         case RunStatusEvent.runRequiresActionKey:
-               if let response = try? RunThreadResponse.createInstanceFrom(data: data) {
-                   let toolCalls = response.requiredAction?.submitToolOutputs.toolCalls ?? []
-                   let response = AssistantFunctionResponse(runId: response.id, toolCalls: toolCalls)
-                   return .runRequiresAction(response)
-               } else {
-                   print("Required Action Event Emitted, but can't parse data")
-                   return handleUnknownEvent(eventType, data: eventData)
-               }
+            if let response = try? RunThreadResponse.createInstanceFrom(data: data) {
+                let toolCalls = response.requiredAction?.submitToolOutputs.toolCalls ?? []
+                let response = AssistantFunctionResponse(runId: response.id, toolCalls: toolCalls)
+                return .runRequiresAction(response)
+            } else {
+                print("Required Action Event Emitted, but can't parse data")
+                return handleUnknownEvent(eventType, data: eventData)
+            }
 
 
         case RunStatusEvent.doneKey:

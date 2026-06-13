@@ -17,12 +17,12 @@ This document outlines a concrete plan to incorporate agentic workflows from the
 **2. Execution Engine (`src/agents/run.py`)**
 - `Runner` class with static methods: `run()`, `run_sync()`, `run_streamed()`
 - `AgentRunner` internal implementation with agent loop logic
-- Context management through `RunContextWrapper` 
+- Context management through `RunContextWrapper`
 - Turn-based execution with `max_turns` limit
 - Built-in usage tracking and tracing
 
 **3. Handoffs System (`src/agents/handoffs.py`)**
-- Handoffs implemented as **specialized tool calls** 
+- Handoffs implemented as **specialized tool calls**
 - `Handoff` dataclass with `tool_name`, `tool_description`, `input_json_schema`, `on_invoke_handoff`
 - `HandoffInputFilter` for modifying conversation history between agents
 - Automatic agent name resolution and validation
@@ -43,7 +43,7 @@ This document outlines a concrete plan to incorporate agentic workflows from the
 
 **From `examples/agent_patterns/`:**
 1. **Deterministic Flows** (`deterministic.py`): Sequential agent chaining with output passing
-2. **Routing** (`routing.py`): Triage agent selecting specialized agents based on input classification  
+2. **Routing** (`routing.py`): Triage agent selecting specialized agents based on input classification
 3. **Agents as Tools** (`agents_as_tools.py`): Agents calling other agents as function tools
 4. **LLM-as-a-Judge** (`llm_as_a_judge.py`): Self-evaluation agents rating and improving outputs
 5. **Parallelization** (`parallelization.py`): Concurrent agent execution with result aggregation
@@ -57,7 +57,7 @@ This document outlines a concrete plan to incorporate agentic workflows from the
 ## Current GPT-Bridge Assessment
 
 ### Existing Capabilities
-- **Assistant API Integration**: Thread/message management, run execution 
+- **Assistant API Integration**: Thread/message management, run execution
 - **Run Handler Pattern**: `FunctionRunHandler`, `MessageRunHandler`, `FailureRunHandler`
 - **Tool Support**: DallE integration, function calling
 - **HTTP Layer**: `RequestManager`, structured error handling
@@ -119,7 +119,7 @@ public class AgentRunner {
         maxTurns: Int = 10,
         runConfig: RunConfig = .default
     ) async throws -> RunResult
-    
+
     public static func runStreamed(
         startingAgent: Agent,
         input: String,
@@ -145,7 +145,7 @@ public class RunContext {
     public var usage: Usage
     public var conversationHistory: [RunItem]
     public var metadata: [String: Any]
-    
+
     // Thread-safe context updates during agent execution
     public func updateUsage(_ newUsage: Usage)
     public func addRunItem(_ item: RunItem)
@@ -168,7 +168,7 @@ Key insight: **Handoffs are tool calls, not a separate mechanism**
 ```swift
 public struct Handoff {
     public let toolName: String
-    public let toolDescription: String  
+    public let toolDescription: String
     public let inputJSONSchema: [String: Any]
     public let onInvokeHandoff: HandoffFunction
     public let agentName: String
@@ -178,7 +178,7 @@ public struct Handoff {
 public typealias HandoffFunction = (RunContextWrapper, String) async throws -> Agent
 ```
 
-**Critical Implementation**: 
+**Critical Implementation**:
 - Handoffs appear as regular function tools to the LLM
 - When invoked, they return a new agent and optionally filter conversation history
 - Input filtering allows removing/modifying messages before handoff (privacy, context pruning)
@@ -189,7 +189,7 @@ public typealias HandoffFunction = (RunContextWrapper, String) async throws -> A
 ```swift
 public class AgentRegistry {
     private var agents: [String: Agent] = [:]
-    
+
     public func register(_ agent: Agent)
     public func resolve(_ agentName: String) throws -> Agent
     public func createHandoff(to agent: Agent) -> Handoff
@@ -231,14 +231,14 @@ func runInputGuardrails(
     input: String,
     context: RunContextWrapper
 ) async throws -> [GuardrailResult] {
-    
+
     return try await withThrowingTaskGroup(of: GuardrailResult.self) { group in
         for guardrail in guardrails {
             group.addTask {
                 return await guardrail.validate(agent: agent, input: input, context: context)
             }
         }
-        
+
         var results: [GuardrailResult] = []
         for try await result in group {
             if result.tripwireTriggered {
@@ -257,7 +257,7 @@ func runInputGuardrails(
 
 **Objective**: Implement proven patterns from SDK examples
 
-#### 4.1 Agents-as-Tools Pattern (4-6 days)  
+#### 4.1 Agents-as-Tools Pattern (4-6 days)
 **Reference**: `examples/agent_patterns/agents_as_tools.py` and `Agent.as_tool()` method
 
 ```swift
@@ -273,7 +273,7 @@ extension Agent {
                 input: input,
                 context: context.context
             )
-            
+
             if let extractor = outputExtractor {
                 return await extractor(result)
             }
@@ -289,16 +289,16 @@ extension Agent {
 ```swift
 public class AgentWorkflow {
     private var steps: [(Agent, String)] = []
-    
+
     public func addStep(agent: Agent, prompt: String) -> Self {
         steps.append((agent, prompt))
         return self
     }
-    
+
     public func execute(initialInput: String, context: RunContext? = nil) async throws -> RunResult {
         var currentInput = initialInput
         var allItems: [RunItem] = []
-        
+
         for (agent, prompt) in steps {
             let stepInput = prompt.replacingOccurrences(of: "{input}", with: currentInput)
             let result = try await AgentRunner.run(
@@ -306,11 +306,11 @@ public class AgentWorkflow {
                 input: stepInput,
                 context: context
             )
-            
+
             allItems.append(contentsOf: result.newItems)
             currentInput = result.finalOutput as? String ?? ""
         }
-        
+
         return RunResult(
             input: initialInput,
             newItems: allItems,
@@ -329,11 +329,11 @@ public struct JudgeWorkflow {
     public let worker: Agent
     public let judge: Agent
     public let maxIterations: Int
-    
+
     public func execute(input: String, context: RunContext? = nil) async throws -> RunResult {
         var currentOutput = input
         var allItems: [RunItem] = []
-        
+
         for iteration in 0..<maxIterations {
             // Worker produces output
             let workerResult = try await AgentRunner.run(
@@ -341,7 +341,7 @@ public struct JudgeWorkflow {
                 input: currentOutput,
                 context: context
             )
-            
+
             // Judge evaluates output
             let judgeInput = "Evaluate this output: \(workerResult.finalOutput)"
             let judgeResult = try await AgentRunner.run(
@@ -349,18 +349,18 @@ public struct JudgeWorkflow {
                 input: judgeInput,
                 context: context
             )
-            
+
             allItems.append(contentsOf: workerResult.newItems)
             allItems.append(contentsOf: judgeResult.newItems)
-            
+
             // Check if judge approves (implementation specific)
             if judgeApproves(judgeResult.finalOutput) {
                 return RunResult(/* final approved result */)
             }
-            
+
             currentOutput = extractFeedback(judgeResult.finalOutput)
         }
-        
+
         // Return best attempt after max iterations
         return RunResult(/* fallback result */)
     }
@@ -378,7 +378,7 @@ The public-facing API must be extremely simple and intuitive:
 let agent = Agent(name: "Assistant", instructions: "You are helpful")
 let result = try await AgentRunner.run(agent: agent, input: "Hello")
 
-// Multi-agent handoff workflow  
+// Multi-agent handoff workflow
 let triage = Agent(name: "Triage", instructions: "Route to appropriate agent")
     .addHandoff(to: spanishAgent)
     .addHandoff(to: englishAgent)
@@ -434,7 +434,7 @@ extension AssistantEndpoint {
 // Reuse existing HTTP infrastructure
 class AgentRequestManager {
     private let requestManager: RequestManager
-    
+
     func executeAgentRun(_ request: AgentRunRequest) async throws -> AgentRunResponse {
         // Leverage existing RequestManager for HTTP handling
         return try await requestManager.performRequest(endpoint: .agentRun(request))
@@ -528,7 +528,7 @@ extension Assistant {
 // New agent-first API alongside existing assistant API
 public class AgentBridge {
     public init(apiKey: String, configuration: AgentConfiguration = .default)
-    
+
     public func run(agent: Agent, input: String) async throws -> AgentResult
     public func runWorkflow(_ workflow: AgentWorkflow) async throws -> WorkflowResult
     public func registerAgent(_ agent: Agent)
@@ -544,7 +544,7 @@ public class AgentBridge {
 - **Agent Runner**: 8-12 days - High complexity, core execution engine with proper async handling
 - **Context Management**: 2-3 days - Medium complexity, thread-safe state management
 
-**Phase 2: Handoffs Implementation** (8-12 days)  
+**Phase 2: Handoffs Implementation** (8-12 days)
 - **Handoff Tools**: 5-8 days - High complexity, tool-based handoff mechanism
 - **Agent Registry**: 3-4 days - Medium complexity, agent lookup and management
 
@@ -554,7 +554,7 @@ public class AgentBridge {
 
 **Phase 4: Advanced Patterns** (12-18 days)
 - **Agents-as-Tools**: 4-6 days - Medium-High complexity, recursive agent execution
-- **Deterministic Workflows**: 4-6 days - Medium complexity, pipeline builder pattern  
+- **Deterministic Workflows**: 4-6 days - Medium complexity, pipeline builder pattern
 - **LLM-as-a-Judge**: 4-6 days - Medium-High complexity, iterative improvement logic
 
 **Integration and Testing** (8-12 days)
@@ -575,7 +575,7 @@ public class AgentBridge {
 - **Memory Usage**: Efficient context management without memory leaks
 - **Test Coverage**: >90% unit test coverage for all agent components
 
-### Developer Experience Metrics  
+### Developer Experience Metrics
 - **Learning Curve**: Developers can implement basic agent workflow in <30 minutes
 - **Documentation Quality**: Complete examples for all major patterns
 - **Error Messages**: Clear, actionable error messages for configuration issues
@@ -586,7 +586,7 @@ public class AgentBridge {
 This plan provides a concrete roadmap for integrating proven agentic workflows from the OpenAI Agents Python SDK into GPT-Bridge. Based on direct analysis of the SDK's source code and examples, it focuses on:
 
 1. **Exact Pattern Replication**: Implementing handoffs, guardrails, and agent loops exactly as designed in the Python SDK
-2. **Swift-Native Implementation**: Leveraging Swift's type safety, concurrency, and memory management 
+2. **Swift-Native Implementation**: Leveraging Swift's type safety, concurrency, and memory management
 3. **Incremental Migration**: Allowing gradual adoption without breaking existing code
 4. **Production Readiness**: Comprehensive testing, error handling, and observability
 

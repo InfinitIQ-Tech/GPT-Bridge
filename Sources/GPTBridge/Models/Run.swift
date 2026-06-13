@@ -36,9 +36,12 @@ public struct FunctionArgument: Codable {
     // while Any is typically frowned upon in Swift, this is strictly for backing and is fenced-in by Decodable initializers
     let value: Any
 
-    /// Internal init for unit testing
-    init<T: Codable>(_ value: T?) {
-        self.value = value ?? ()
+    public init<T: Codable>(_ value: T?) {
+        if let value {
+            self.value = value
+        } else {
+            self.value = Optional<T>.none as Any
+        }
     }
 
     public init(from decoder: Decoder) throws {
@@ -139,7 +142,7 @@ struct ToolCall: DecodableResponse {
     let function: AssistantFunction
 }
 
-public struct AssistantFunction: DecodableResponse, Equatable {
+public struct AssistantFunction: Codable, DecodableResponse, Equatable {
     public let name: String
     public let arguments: [String: FunctionArgument]
 
@@ -151,7 +154,7 @@ public struct AssistantFunction: DecodableResponse, Equatable {
         case stringDataNotValidJSON(decodingError: DecodingError)
     }
 
-    init(name: String, arguments: [String: FunctionArgument]) {
+    public init(name: String, arguments: [String: FunctionArgument]) {
         self.name = name
         self.arguments = arguments
     }
@@ -169,6 +172,16 @@ public struct AssistantFunction: DecodableResponse, Equatable {
         }
 
         arguments = try JSONDecoder().decode([String: FunctionArgument].self, from: data)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(name, forKey: .name)
+        let data = try JSONEncoder().encode(arguments)
+        guard let argumentsString = String(data: data, encoding: .utf8) else {
+            throw EncodingError.invalidValue(arguments, EncodingError.Context(codingPath: [CodingKeys.arguments], debugDescription: "Cannot encode arguments as UTF-8 JSON"))
+        }
+        try container.encode(argumentsString, forKey: .arguments)
     }
 
     public static func == (lhs: AssistantFunction, rhs: AssistantFunction) -> Bool {

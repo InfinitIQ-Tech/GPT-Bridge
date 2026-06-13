@@ -56,7 +56,7 @@ struct StreamingRequestManager: RequestManageable {
     }
 
     func streamThreadRun<U>(
-        endpoint: AssistantEndpoint,
+        endpoint: any OpenAIEndpoint,
         method: HttpMethod,
         timeout: TimeInterval = 30.0,
         requestData: U?
@@ -65,7 +65,7 @@ struct StreamingRequestManager: RequestManageable {
 
         var request = URLRequest(url: makeURL(fromEndpoint: endpoint))
         request.httpMethod = method.rawValue
-        request.allHTTPHeaderFields = requestData?.jsonPayloadHeaders
+        request.allHTTPHeaderFields = OpenAIHeaders.jsonPayloadHeaders(for: endpoint, requestHeaders: requestData?.jsonPayloadHeaders)
         request.setValue("text/event-stream", forHTTPHeaderField: "Accept")
 
         if let requestData = requestData, method != .GET {
@@ -73,6 +73,26 @@ struct StreamingRequestManager: RequestManageable {
         }
 
         return ThreadRunStreamHandler().streamRunStatusEvents(with: request, inactivityTimeout: timeout)
+    }
+
+    func streamChatCompletion<U>(
+        endpoint: any OpenAIEndpoint,
+        method: HttpMethod,
+        timeout: TimeInterval = 30.0,
+        requestData: U?
+    ) async throws -> AsyncThrowingStream<ChatCompletionStreamEvent, any Error>
+    where U : EncodableRequest {
+
+        var request = URLRequest(url: makeURL(fromEndpoint: endpoint))
+        request.httpMethod = method.rawValue
+        request.allHTTPHeaderFields = OpenAIHeaders.jsonPayloadHeaders(for: endpoint, requestHeaders: requestData?.jsonPayloadHeaders)
+        request.setValue("text/event-stream", forHTTPHeaderField: "Accept")
+
+        if let requestData = requestData, method != .GET {
+            request.httpBody = try requestData.encodeInstance()
+        }
+
+        return ChatCompletionStreamHandler().streamChatCompletionEvents(with: request, inactivityTimeout: timeout)
     }
 }
 
@@ -122,7 +142,7 @@ public class AssistantFunctionResponse {
 
         let request = ToolCallRequest(toolOutputs: outputs, stream: true)
 
-        return try await streamingRequestManager().streamThreadRun(endpoint: .submitToolOutputs(threadId: threadId, runId: runId), method: .POST, requestData: request)
+        return try await streamingRequestManager().streamThreadRun(endpoint: AssistantEndpoint.submitToolOutputs(threadId: threadId, runId: runId), method: .POST, requestData: request)
     }
     /// Cancel the run after receiving the function arguments from the assistant.
     ///
@@ -130,6 +150,6 @@ public class AssistantFunctionResponse {
     /// - You don't care to retrieve a response from the assistant
     /// - You want to save on costs (the longer the run is left active, the higher the cost)
     public func cancelRun(threadId: String) async throws {
-        try await GPTBridge.cancelRun(threadId: threadId, runId: runId)
+        try await GPTBridge.cancelAssistantRun(threadId: threadId, runId: runId)
     }
 }

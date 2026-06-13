@@ -26,4 +26,13 @@ final class FunctionRunHandlerTests: XCTestCase {
 
     }
 
+    func testFunctionArgument_encodesNilAsNull() throws {
+        let argument = FunctionArgument(String?.none)
+
+        let data = try JSONEncoder().encode(argument)
+        let json = try XCTUnwrap(String(data: data, encoding: .utf8))
+
+        XCTAssertEqual(json, "null")
+    }
+
 }
