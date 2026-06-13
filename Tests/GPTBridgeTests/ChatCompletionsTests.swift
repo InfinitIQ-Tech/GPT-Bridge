@@ -70,6 +70,33 @@ class ChatCompletionsTests: XCTestCase {
         XCTAssertEqual(function["name"] as? String, "get_current_weather")
     }
 
+    func testChatCompletionRequest_canForceNonStreamingPayload() throws {
+        let request = ChatCompletionRequest(
+            model: "test-model",
+            messages: [
+                ChatCompletionMessage(role: .user, content: "Hello")
+            ],
+            stream: true
+        )
+
+        let data = try request.withStream(false).encodeInstance()
+        let object = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+
+        XCTAssertEqual(object["stream"] as? Bool, false)
+    }
+
+    func testChatCompletionToolCall_exposesChatCompletionFunctionType() {
+        let function = ChatCompletionFunction(
+            name: "get_current_weather",
+            arguments: ["location": FunctionArgument("San Francisco, CA")]
+        )
+
+        let toolCall = ChatCompletionToolCall(id: "call_abc123", function: function)
+
+        XCTAssertEqual(toolCall.function.name, "get_current_weather")
+        XCTAssertEqual(toolCall.function.arguments["location"]?.asString, "San Francisco, CA")
+    }
+
     func testChatCompletionResponse_canDecodeMessageResult() throws {
         let response = try toInstance(from: chatCompletionMessageJSONString, to: ChatCompletionResponse.self)
 

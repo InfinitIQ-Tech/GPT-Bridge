@@ -8,84 +8,15 @@
 import Foundation
 
 /// Handles streaming of chat completion chunks via SSE.
-struct ChatCompletionStreamHandler {
+struct ChatCompletionStreamHandler: SSEStreamHandlable {
     func streamChatCompletionEvents(
         with request: URLRequest,
         inactivityTimeout: TimeInterval?
     ) -> AsyncThrowingStream<ChatCompletionStreamEvent, Error> {
-        actor LastEventTracker {
-            private var lastEventTime = Date()
-            func updateLastEventTime() {
-                lastEventTime = Date()
-            }
-            func getLastEventTime() -> Date {
-                lastEventTime
-            }
-        }
-        let eventTracker = LastEventTracker()
-
-        return AsyncThrowingStream { continuation in
-            let eventReadingTask = Task {
-                do {
-                    let (byteStream, response) = try await URLSession.shared.bytes(for: request)
-                    try await validateChatCompletionResponse(response, byteStream: byteStream)
-
-                    var eventDataBuffer = ""
-
-                    for try await rawLine in byteStream.linesPreservingEmpty() {
-                        await eventTracker.updateLastEventTime()
-
-                        let line = rawLine.trimmingCharacters(in: .whitespacesAndNewlines)
-
-                        if line.hasPrefix("data:") {
-                            let dataPart = line.dropFirst("data:".count)
-                            if !eventDataBuffer.isEmpty { eventDataBuffer.append("\n") }
-                            eventDataBuffer.append(contentsOf: dataPart)
-                        } else if line.isEmpty {
-                            parseAndYieldChatCompletionEvent(
-                                eventData: eventDataBuffer,
-                                continuation: continuation
-                            )
-                            eventDataBuffer = ""
-                        }
-
-                        if Task.isCancelled { break }
-                    }
-
-                    continuation.finish()
-                } catch {
-                    continuation.finish(throwing: error)
-                }
-            }
-
-            let watchdogTask = Task {
-                guard let timeout = inactivityTimeout else { return }
-                while !Task.isCancelled {
-                    try? await Task.sleep(nanoseconds: 1_000_000_000)
-                    let elapsed = await Date().timeIntervalSince(eventTracker.getLastEventTime())
-                    if elapsed > timeout {
-                        eventReadingTask.cancel()
-                        let errorInfo = OpenAIJSONError(
-                            message: "No chat completion SSE events for \(Int(timeout))s (timeout).",
-                            type: nil,
-                            param: nil,
-                            code: nil
-                        )
-                        continuation.yield(.errorOccurred(errorInfo))
-                        continuation.finish()
-                        break
-                    }
-                }
-            }
-
-            continuation.onTermination = { _ in
-                eventReadingTask.cancel()
-                watchdogTask.cancel()
-            }
-        }
+        streamEvents(with: request, inactivityTimeout: inactivityTimeout)
     }
 
-    private func validateChatCompletionResponse(
+    func validateResponse(
         _ response: URLResponse,
         byteStream: URLSession.AsyncBytes
     ) async throws {
@@ -104,37 +35,46 @@ struct ChatCompletionStreamHandler {
         }
     }
 
-    private func parseAndYieldChatCompletionEvent(
-        eventData: String,
-        continuation: AsyncThrowingStream<ChatCompletionStreamEvent, Error>.Continuation
-    ) {
+    func parseEvents(eventType: String, eventData: String) -> [ChatCompletionStreamEvent] {
         let trimmedEventData = eventData.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmedEventData.isEmpty else { return }
+        guard !trimmedEventData.isEmpty else { return [] }
 
-        if trimmedEventData == "[DONE]" {
-            continuation.yield(.done)
-            return
+        if eventType == "done" || trimmedEventData == "[DONE]" {
+            return [.done]
         }
 
         let data = Data(trimmedEventData.utf8)
         guard let chunk = try? ChatCompletionChunk.createInstanceFrom(data: data) else {
-            continuation.yield(.unknown(data: eventData))
-            return
+            return [.unknown(data: eventData)]
         }
 
-        for choice in chunk.choices {
+        return chunk.choices.flatMap { choice in
+            var events: [ChatCompletionStreamEvent] = []
+
             if let content = choice.delta.content,
                !content.isEmpty {
-                continuation.yield(.contentDelta(content))
+                events.append(.contentDelta(content))
             }
 
             choice.delta.toolCalls?.forEach {
-                continuation.yield(.toolCallDelta($0))
+                events.append(.toolCallDelta($0))
             }
 
             if choice.finishReason != nil {
-                continuation.yield(.finished(choice.finishReason))
+                events.append(.finished(choice.finishReason))
             }
+
+            return events
         }
+    }
+
+    func timeoutEvent(timeout: TimeInterval) -> ChatCompletionStreamEvent? {
+        let errorInfo = OpenAIJSONError(
+            message: "No chat completion SSE events for \(Int(timeout))s (timeout).",
+            type: nil,
+            param: nil,
+            code: nil
+        )
+        return .errorOccurred(errorInfo)
     }
 }

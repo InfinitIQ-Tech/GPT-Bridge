@@ -150,6 +150,6 @@ public class AssistantFunctionResponse {
     /// - You don't care to retrieve a response from the assistant
     /// - You want to save on costs (the longer the run is left active, the higher the cost)
     public func cancelRun(threadId: String) async throws {
-        try await GPTBridge.cancelRun(threadId: threadId, runId: runId)
+        try await GPTBridge.cancelAssistantRun(threadId: threadId, runId: runId)
     }
 }

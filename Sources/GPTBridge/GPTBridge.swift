@@ -66,7 +66,7 @@ public class GPTBridge {
             .makeRequest(
                 endpoint: CompletionsEndpoint.chatCompletions,
                 method: .POST,
-                requestData: request
+                requestData: request.withStream(false)
             )
     }
 
@@ -468,6 +468,13 @@ public class GPTBridge {
     /// This is useful for reducing processing time in the OpenAI API when the assistant doesn't need to know the results of a function call
     @available(*, deprecated, message: "Chat Completions do not create assistant runs; cancel the consuming Task for streamed completions.")
     public static func cancelRun(
+        threadId: String,
+        runId: String
+    ) async throws {
+        try await cancelAssistantRun(threadId: threadId, runId: runId)
+    }
+
+    static func cancelAssistantRun(
         threadId: String,
         runId: String
     ) async throws {

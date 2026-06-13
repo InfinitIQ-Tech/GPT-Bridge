@@ -24,15 +24,28 @@ protocol SSEStreamHandlable {
     /// The type of events this handler produces.
     associatedtype EventType
 
+    /// Event type to use when an SSE stream emits only data lines.
+    var defaultEventType: String { get }
+
     /// Validates the HTTP response to ensure it's valid for streaming.
     func validateResponse(_ response: URLResponse, byteStream: URLSession.AsyncBytes) async throws
 
     /// Parses raw SSE event data into typed events.
-    func parseEvent(eventType: String, eventData: String) -> EventType?
+    func parseEvents(eventType: String, eventData: String) -> [EventType]
+
+    /// Optional typed event to yield before finishing on timeout.
+    func timeoutEvent(timeout: TimeInterval) -> EventType?
 }
 
 /// Extension providing default implementation for the SSE streaming logic.
 extension SSEStreamHandlable {
+    var defaultEventType: String {
+        "message"
+    }
+
+    func timeoutEvent(timeout: TimeInterval) -> EventType? {
+        nil
+    }
 
     /// Streams events from a given SSE endpoint.
     /// - Parameters:
@@ -53,45 +66,30 @@ extension SSEStreamHandlable {
                     let (byteStream, response) = try await URLSession.shared.bytes(for: request)
                     try await validateResponse(response, byteStream: byteStream)
 
-                    var currentEventType: String? = nil
-                    var eventDataBuffer = ""
+                    var eventParser = SSEEventLineParser<EventType>()
 
                     for try await rawLine in byteStream.linesPreservingEmpty() {
                         // Update last-event time on every line
                         await eventTracker.updateLastEventTime()
 
-                        let line = rawLine.trimmingCharacters(in: .whitespacesAndNewlines)
-
-                        if line.hasPrefix("event:") {
-                            currentEventType = line
-                                .dropFirst("event:".count)
-                                .trimmingCharacters(in: .whitespaces)
-
-                        } else if line.hasPrefix("data:") {
-                            // SSE data lines may span multiple lines, so accumulate
-                            let dataPart = line.dropFirst("data:".count)
-                            if !eventDataBuffer.isEmpty { eventDataBuffer.append("\n") }
-                            eventDataBuffer.append(contentsOf: dataPart)
-
-                        } else if line.isEmpty {
-                            // End of one SSE event block
-                            if let eventType = currentEventType,
-                               let event = parseEvent(eventType: eventType, eventData: eventDataBuffer) {
-                                continuation.yield(event)
-                            } else {
-                                // No "event:" → check if data indicates [DONE]
-                                let trimmedData = eventDataBuffer.trimmingCharacters(in: .whitespacesAndNewlines)
-                                if trimmedData == "[DONE]", let doneEvent = parseEvent(eventType: "done", eventData: "[DONE]") {
-                                    continuation.yield(doneEvent)
-                                }
-                            }
-
-                            // Reset
-                            currentEventType = nil
-                            eventDataBuffer = ""
+                        let events = eventParser.parseLine(
+                            rawLine,
+                            defaultEventType: defaultEventType,
+                            parseEvents: parseEvents
+                        )
+                        for event in events {
+                            continuation.yield(event)
                         }
 
                         if Task.isCancelled { break }
+                    }
+
+                    let remainingEvents = eventParser.flush(
+                        defaultEventType: defaultEventType,
+                        parseEvents: parseEvents
+                    )
+                    for event in remainingEvents {
+                        continuation.yield(event)
                     }
 
                     continuation.finish()
@@ -108,7 +106,12 @@ extension SSEStreamHandlable {
                     let elapsed = await Date().timeIntervalSince(eventTracker.getLastEventTime())
                     if elapsed > timeout {
                         eventReadingTask.cancel()
-                        continuation.finish(throwing: SSEStreamError.timeout(timeout))
+                        if let timeoutEvent = timeoutEvent(timeout: timeout) {
+                            continuation.yield(timeoutEvent)
+                            continuation.finish()
+                        } else {
+                            continuation.finish(throwing: SSEStreamError.timeout(timeout))
+                        }
                         break
                     }
                 }
@@ -120,6 +123,57 @@ extension SSEStreamHandlable {
                 watchdogTask.cancel()
             }
         }
+    }
+}
+
+struct SSEEventLineParser<EventType> {
+    private var currentEventType: String? = nil
+    private var eventDataBuffer = ""
+
+    mutating func parseLine(
+        _ rawLine: String,
+        defaultEventType: String,
+        parseEvents: (String, String) -> [EventType]
+    ) -> [EventType] {
+        let line = rawLine.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        if line.hasPrefix("event:") {
+            currentEventType = line
+                .dropFirst("event:".count)
+                .trimmingCharacters(in: .whitespaces)
+            return []
+        }
+
+        if line.hasPrefix("data:") {
+            let dataPart = line.dropFirst("data:".count)
+            if !eventDataBuffer.isEmpty { eventDataBuffer.append("\n") }
+            eventDataBuffer.append(contentsOf: dataPart)
+            return []
+        }
+
+        if line.isEmpty {
+            return flush(defaultEventType: defaultEventType, parseEvents: parseEvents)
+        }
+
+        return []
+    }
+
+    mutating func flush(
+        defaultEventType: String,
+        parseEvents: (String, String) -> [EventType]
+    ) -> [EventType] {
+        let trimmedData = eventDataBuffer.trimmingCharacters(in: .whitespacesAndNewlines)
+        defer {
+            currentEventType = nil
+            eventDataBuffer = ""
+        }
+
+        guard !trimmedData.isEmpty else {
+            return []
+        }
+
+        let eventType = trimmedData == "[DONE]" ? "done" : currentEventType ?? defaultEventType
+        return parseEvents(eventType, eventDataBuffer)
     }
 }
 

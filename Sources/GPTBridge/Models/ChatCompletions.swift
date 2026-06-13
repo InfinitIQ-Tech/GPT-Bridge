@@ -137,12 +137,14 @@ public enum ChatCompletionToolChoice: String, Codable {
     case required
 }
 
+public typealias ChatCompletionFunction = AssistantFunction
+
 public struct ChatCompletionToolCall: Codable {
     public let id: String
     public let type: String
-    public let function: AssistantFunction
+    public let function: ChatCompletionFunction
 
-    public init(id: String, type: String = "function", function: AssistantFunction) {
+    public init(id: String, type: String = "function", function: ChatCompletionFunction) {
         self.id = id
         self.type = type
         self.function = function
